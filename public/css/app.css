@@ -1,0 +1,13 @@
+.color-preview {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 50%;
+}
+
+@media (min-width: 992px) {
+    .product-card:has(.select-card-check), .product-card:hover {
+        box-shadow: var(--cz-box-shadow);
+        z-index: 2;
+    }
+}
