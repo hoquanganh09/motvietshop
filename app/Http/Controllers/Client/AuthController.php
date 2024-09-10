@@ -8,6 +8,8 @@ use App\Actions\Client\Auth\RegisterAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Auth\LoginRequest;
 use App\Http\Requests\Client\Auth\RegisterRequest;
+use App\Jobs\Client\SendMailVerifyEmailJob;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -65,5 +67,19 @@ class AuthController extends Controller
         Auth::logout();
 
         return redirect()->back();
+    }
+
+    public function verifyEmail()
+    {
+        dispatch(new SendMailVerifyEmailJob(auth()->user()));
+
+        return redirect()->back()->with('success_verify_email', 'Vui lòng kiểm tra email để xác thực tài khoản');
+    }
+
+    public function handleVerifyEmail(EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+
+        return to_route('client.home.profile');
     }
 }

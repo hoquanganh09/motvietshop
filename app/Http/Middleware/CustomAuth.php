@@ -25,6 +25,12 @@ class CustomAuth
             return $next($request);
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+                'redirect' => route($redirectGuard[$guard]),
+            ], 401);
+        }
         return to_route($redirectGuard[$guard]);
     }
 }

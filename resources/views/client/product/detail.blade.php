@@ -21,8 +21,8 @@
                 <div class="position-relative">
                     <span
                         class="badge text-bg-danger position-absolute top-0 start-0 z-2 mt-3 mt-sm-4 ms-3 ms-sm-4">Sale</span>
-                    <button type="button"
-                        class="btn btn-icon btn-secondary animate-pulse fs-lg bg-transparent border-0 position-absolute top-0 end-0 z-2 mt-2 mt-sm-3 me-2 me-sm-3"
+                    <button type="button" data-url="{{ route('client.wishlist.store', $product->id) }}"
+                        class="btn-add-to-wishlist-2 btn btn-icon btn-secondary animate-pulse fs-lg bg-transparent border-0 position-absolute top-0 end-0 z-2 mt-2 mt-sm-3 me-2 me-sm-3"
                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-sm"
                         data-bs-title="Add to Wishlist" aria-label="Add to Wishlist">
                         <i class="ci-heart animate-target"></i>
@@ -642,6 +642,26 @@
                 colorEl.on('change', function () {
                     const parent = $(this).closest('.color-container');
                     parent.find('.form-label').html($(this).dataset('label'));
+                });
+            });
+
+            $(() => {
+                const timer = 300;
+                let clearTimeOut = null;
+
+                $(document).on('click', '.btn-add-to-wishlist-2', function() {
+                    const url = $(this).attr('data-url');
+
+                    if (clearTimeOut != null) {
+                        clearTimeout(clearTimeOut);
+                        clearTimeOut = null;
+                    }
+
+                    clearTimeOut = setTimeout(() => {
+                        ajax(url, 'post', {}, function(res) {
+                            toast(res.data.message);
+                        });
+                    }, timer);
                 });
             });
         </script>

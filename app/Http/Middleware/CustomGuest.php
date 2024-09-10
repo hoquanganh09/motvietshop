@@ -25,6 +25,11 @@ class CustomGuest
             return $next($request);
         }
 
+        return response()->json([
+            'message' => 'Unauthorized.',
+            'redirect' => route($redirectGuard[$guard]),
+        ], 401);
+
         return to_route($redirectGuard[$guard]);
     }
 }

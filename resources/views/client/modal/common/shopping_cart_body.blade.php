@@ -6,21 +6,21 @@
         </a>
         <div class="w-100 min-w-0 ps-3">
             <h5 class="d-flex animate-underline mb-2">
-                <a class="d-block fs-sm fw-medium text-truncate animate-target"
+                <a class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif d-block fs-sm fw-medium text-truncate animate-target"
                     href="{{ route('client.home.productDetail', $item['id']) }}">
                     {{ $item['name'] }}
                 </a>
             </h5>
-            <div class="h6 pb-0 mb-0">{{ formatMoney($item['price']) }}
+            <div class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif h6 pb-0 mb-0">{{ formatMoney($item['price']) }}
                 @if ($item['is_sale'])
                     <del class="text-body-tertiary fs-xs fw-normal">{{ formatMoney($item['old_price']) }}</del>
                 @endif
             </div>
-            <div class="h6 pb-0 mb-0 fs-xs fw-normal">
+            <div class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif h6 pb-0 mb-0 fs-xs fw-normal">
                 <span class="text-body-tertiary">Màu:</span>
                 <span>{{ $item['color_label'] }}</span>
             </div>
-            <div class="h6 pb-1 mb-2 fs-xs fw-normal">
+            <div class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif h6 pb-1 mb-2 fs-xs fw-normal">
                 <span class="text-body-tertiary">Size:</span>
                 <span>{{ $item['size_name'] }}</span>
             </div>

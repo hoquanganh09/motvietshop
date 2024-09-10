@@ -13,22 +13,31 @@
 
                     <!-- Basic info -->
                     <div class="border-bottom py-4">
+                        @php
+                            $errorInfo = $errors->has('fullname') || $errors->has('date_of_birth');
+                        @endphp
                         <div class="nav flex-nowrap align-items-center justify-content-between pb-1 mb-3">
                             <h2 class="h6 mb-0">Thông tin cơ bản</h2>
                             <a class="nav-link hiding-collapse-toggle text-decoration-underline p-0 collapsed"
                                 href=".basic-info" data-bs-toggle="collapse" aria-expanded="false"
                                 aria-controls="basicInfoPreview basicInfoEdit">Chỉnh sửa</a>
                         </div>
-                        <div class="basic-info collapse show" id="basicInfoPreview" style="">
+                        <div class="basic-info collapse @if (!$errorInfo) show @endif"
+                            id="basicInfoPreview" style="">
                             <ul class="list-unstyled fs-sm m-0">
                                 <li>{{ $user->fullname }}</li>
                                 <li>{{ $user->date_of_birth }}</li>
                             </ul>
                         </div>
-                        <div class="basic-info collapse" id="basicInfoEdit" style="">
-                            <form class="row g-3 g-sm-4">
+                        <div class="basic-info collapse @if ($errorInfo) show @endif"
+                            id="basicInfoEdit" style="">
+                            <form class="row g-3 g-sm-4" action="{{ route('client.auth.changeInfo') }}" method="post">
+                                @csrf
+                                @method('put')
                                 <div class="col-sm-6">
-                                    <label for="fn" class="form-label">Họ và tên</label>
+                                    <label for="fn" class="form-label">Họ và tên
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <div class="position-relative">
                                         <input name="fullname" type="text"
                                             class="form-control @error('fullname') is-invalid @enderror" id="fn"
@@ -39,13 +48,16 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label for="birthdates" class="form-label">Ngày sinh</label>
+                                    <label for="birthdate" class="form-label">Ngày sinh</label>
                                     <div class="position-relative">
-                                        <input value="{{ $user->fullname }}" id="birthdate" type="date"
-                                            class="form-control form-icon-end">
+                                        <input value="{{ old('date_of_birth', $user->date_of_birth) }}" id="birthdate"
+                                            name="date_of_birth" type="date" class="form-control form-icon-end">
                                         <i
-                                            class="ci-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
+                                            class="show-date-picker ci-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
                                     </div>
+                                    @error('date_of_birth')
+                                        <div class="invalid-feedback" style="display: block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-12">
                                     <div class="d-flex gap-3 pt-2 pt-sm-0">
@@ -69,22 +81,41 @@
                                 href=".contact-info" data-bs-toggle="collapse" aria-expanded="false"
                                 aria-controls="contactInfoPreview contactInfoEdit">Chỉnh sửa</a>
                         </div>
-                        <div class="contact-info collapse show" id="contactInfoPreview" style="">
+                        @php
+                            $errorContact = $errors->has('email') || $errors->has('phone_number');
+                        @endphp
+                        <div class="contact-info collapse @if (!$errorContact) show @endif"
+                            id="contactInfoPreview" style="">
                             <ul class="list-unstyled fs-sm m-0">
                                 <li class="mb-1">{{ $user->email }}
                                     @if ($user->isEmailVerified())
                                         <span class="text-success ms-1">Đã xác thực</span>
                                     @else
                                         <span class="text-danger ms-1">Chưa xác thực</span>
+
+                                        @if (!session()->has('success_verify_email'))
+                                            <a href="{{ route('verification.notice') }}" class="ms-2">Xác thực
+                                                ngay</a>
+                                        @else
+                                            <span class="ms-2 timming" data-second="30"></span>
+                                            <a class="text-secondary resend-verify-email"
+                                                href="{{ route('verification.notice') }}">Gửi lại</a>
+                                        @endif
                                     @endif
                                 </li>
                                 <li>{{ $user->phone_number }}</li>
                             </ul>
                         </div>
-                        <div class="contact-info collapse" id="contactInfoEdit" style="">
-                            <form class="row g-3 g-sm-4 needs-validation" novalidate="">
+                        <div class="contact-info collapse @if ($errorContact) show @endif"
+                            id="contactInfoEdit" style="">
+                            <form class="row g-3 g-sm-4" method="post"
+                                action="{{ route('client.auth.changeContact') }}">
+                                @csrf
+                                @method('put')
                                 <div class="col-sm-6">
-                                    <label for="email" class="form-label">Địa chỉ email</label>
+                                    <label for="email" class="form-label">Địa chỉ email
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <div class="position-relative">
                                         <input name="email" type="text"
                                             class="form-control @error('email') is-invalid @enderror" id="email"
@@ -97,11 +128,12 @@
                                 <div class="col-sm-6">
                                     <label for="phone" class="form-label">Số điện thoại</label>
                                     <div class="position-relative">
-                                        <input type="number"
+                                        <input type="number" name="phone_number"
                                             class="form-control @error('phone_number') is-invalid @enderror"
                                             id="phone" value="{{ old('phone_number', $user->phone_number) }}">
                                         @error('phone_number')
-                                            <div style="display: block;" class="invalid-feedback">{{ $message }}</div>
+                                            <div style="display: block;" class="invalid-feedback">{{ $message }}
+                                            </div>
                                         @enderror
                                     </div>
                                 </div>
@@ -190,4 +222,38 @@
             </div>
         </div>
     </div>
+    @push('js')
+        <script>
+            $('input[type=date],.show-date-picker').on('click', showPopupDatePicker);
+
+            function showPopupDatePicker() {
+                document.querySelector('input[type=date]').showPicker();
+            }
+
+            $('.resend-verify-email.text-secondary').on('click', function(e) {
+                e.preventDefault();
+            });
+
+            @if (session()->has('success_verify_email'))
+                $(() => {
+                    const timing = $('.timming');
+                    let clear = null;
+                    let time = timing[0].dataset.second;
+
+                    timing.html(time + 's');
+
+                    clear = setInterval(() => {
+                        if (time == 1) {
+                            clearInterval(clear);
+                            $('.resend-verify-email').removeClass('text-secondary');
+                            timing.html('');
+                        } else {
+                            time -= 1;
+                            timing.html(time + 's');
+                        }
+                    }, 1000);
+                });
+            @endif
+        </script>
+    @endpush
 </x-client.layout.home>

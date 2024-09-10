@@ -1,5 +1,5 @@
 <header class="navbar px-0 pb-4 mt-n2 mt-sm-0 mb-2 mb-md-3 mb-lg-4">
-    <a href="index.html" class="navbar-brand pt-0">
+    <a href="{{ route('client.home.index') }}" class="navbar-brand pt-0">
         <span class="d-flex flex-shrink-0 text-primary me-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36">
                 <path

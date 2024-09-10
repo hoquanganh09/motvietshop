@@ -3,6 +3,9 @@
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
+use App\Http\Controllers\Client\CouponController;
+use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\ShippingAddressController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -12,11 +15,16 @@ Route::name('client.')->group(function () {
         Route::controller(ClientController::class)->as('home.')->group(function () {
             Route::get('/san-pham-yeu-thich', 'wishlist')->name('wishlist');
             Route::get('/thong-tin-ca-nhan', 'profile')->name('profile');
+            Route::get('/dia-chi-nhan-hang', 'addresses')->name('addresses');
+            Route::get('/thong-bao', 'notification')->name('notification');
+            Route::get('/thanh-toan', 'checkout')->name('checkout');
+            Route::get('/dat-hang-thanh-cong', 'orderSuccess')->name('orderSuccess');
+            Route::get('/don-hang-da-dat', 'orderHistory')->name('orderHistory');
         });
 
         Route::controller(WishlistController::class)->as('wishlist.')->group(function () {
-           Route::post('/add-to-wishlist/{product}', 'store')->name('store');
-           Route::post('/delete-wishlist', 'destroy')->name('destroy'); 
+            Route::post('/add-to-wishlist/{product}', 'store')->name('store');
+            Route::post('/delete-wishlist', 'destroy')->name('destroy');
         });
 
         Route::controller(AuthController::class)->as('auth.')->group(function () {
@@ -25,6 +33,24 @@ Route::name('client.')->group(function () {
 
         Route::controller(UserController::class)->as('auth.')->group(function () {
             Route::put('/doi-mat-khau', 'changePassword')->name('changePassword');
+            Route::put('/doi-lien-he', 'changeContact')->name('changeContact');
+            Route::put('/doi-thong-tin', 'changeInfo')->name('changeInfo');
+        });
+
+        Route::controller(ShippingAddressController::class)->as('shippingAddress.')->group(function () {
+            Route::post('/them-dia-chi', 'store')->name('store');
+            Route::put('/cap-nhat-dia-chi/{shippingAddress}', 'update')->name('update');
+            Route::delete('/xoa-dia-chi/{shippingAddress}', 'destroy')->name('destroy');
+        });
+
+        Route::controller(CouponController::class)->as('coupon.')->group(function () {
+            Route::post('/ap-dung-code', 'apply')->name('apply');
+        });
+
+        Route::controller(OrderController::class)->as('order.')->group(function () {
+            Route::post('/dat-hang', 'store')->name('store');
+            Route::get('/show-order-detail/{order}', 'show')->name('show');
+            Route::put('/huy-don-hang/{order}', 'cancel')->name('cancel');
         });
     });
 
@@ -42,6 +68,8 @@ Route::name('client.')->group(function () {
     Route::controller(ClientController::class)->as('home.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/chi-tiet-san-pham/{product}', 'productDetail')->name('productDetail');
+        Route::get('/tim-kiem-san-pham', 'productSearch')->name('productSearch');
+        Route::get('/loc-san-pham', 'shop')->name('shop');
     });
 
     Route::controller(CartController::class)->as('cart.')->group(function () {
@@ -50,5 +78,12 @@ Route::name('client.')->group(function () {
         Route::post('/update-quantity/{key}', 'updateQuantity')->name('updateQuantity');
         Route::get('/gio-hang', 'showCart')->name('showCart');
         Route::delete('/clear-cart', 'clearCart')->name('clearCart');
+    });
+});
+
+Route::middleware('customAuth:web')->group(function () {
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('/email/verify', 'verifyEmail')->name('verification.notice');
+        Route::get('/email/verify/{id}/{hash}', 'handleVerifyEmail')->name('verification.verify');
     });
 });

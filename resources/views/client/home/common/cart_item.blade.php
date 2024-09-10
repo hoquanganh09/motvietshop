@@ -1,4 +1,4 @@
-@foreach (session()->get('cart', []) as $item)
+@foreach (getCart() as $item)
     <tr class="cart-item" data-key="{{ $item['key'] }}">
         <td class="py-3 ps-0">
             <div class="d-flex align-items-center">
@@ -11,12 +11,12 @@
                 </a>
                 <div class="w-100 min-w-0 ps-2 ps-xl-3">
                     <h5 class="d-flex animate-underline mb-2">
-                        <a class="d-block fs-sm fw-medium text-truncate animate-target"
+                        <a class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif d-block fs-sm fw-medium text-truncate animate-target"
                             href="{{ route('client.home.productDetail', $item['id']) }}">
                             {{ $item['name'] }}
                         </a>
                     </h5>
-                    <ul class="list-unstyled gap-1 fs-xs mb-0">
+                    <ul class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif list-unstyled gap-1 fs-xs mb-0">
                         <li><span class="text-body-secondary">Màu:</span> <span
                                 class="text-dark-emphasis fw-medium">{{ $item['color_label'] }}</span>
                         </li>
@@ -47,12 +47,12 @@
                 </div>
             </div>
         </td>
-        <td class="h6 py-3 d-none d-xl-table-cell">{{ formatMoney($item['price']) }}
+        <td class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif h6 py-3 d-none d-xl-table-cell">{{ formatMoney($item['price']) }}
             @if ($item['is_sale'])
                 <del class="text-body-tertiary fs-xs fw-normal">{{ formatMoney($item['old_price']) }}</del>
             @endif
         </td>
-        <td class="py-3 d-none d-md-table-cell">
+        <td class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif py-3 d-none d-md-table-cell">
             <div class="count-input">
                 <button data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="button"
                     class="btn-decrement btn btn-icon" aria-label="Decrement quantity">
@@ -65,7 +65,7 @@
                 </button>
             </div>
         </td>
-        <td class="h6 py-3 d-none d-md-table-cell">
+        <td class="@if ($item['disabled'] ?? false) text-decoration-line-through @endif h6 py-3 d-none d-md-table-cell">
             {{ formatMoney($item['price'] * $item['quantity']) }}
         </td>
         <td class="text-end py-3 px-0">

@@ -33,6 +33,7 @@ class CartController extends Controller
             'size' => $size->id,
             'key' => $key,
             'discount' => $product->getDiscount(),
+            'disabled' => false,
         ];
 
         Session::put('cart', $carts);

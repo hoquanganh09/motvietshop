@@ -32,11 +32,11 @@
                 <x-client.product :product="$item" />
             @endforeach
         </div>
-
-        <div class="text-center">
-            {{-- <button>View more</button> --}}
-            <a class="view-more-product text-dark" href="{{ route('client.home.index') }}">View more</a>
-        </div>
+        @if ($canViewMore)
+            <div class="text-center">
+                <a class="view-more-product text-dark" href="{{ route('client.home.index') }}">Xem thêm</a>
+            </div>
+        @endif
     </section>
 
     {{-- @include('client.layouts.special_collection') --}}
@@ -46,17 +46,14 @@
 
     @push('js')
         <script>
-            $('.view-more-product').click(function(e) {
-                e.preventDefault();
-                const url = $(this).attr('href');
-                const grid = $('.product-grid');
-
-                console.log(grid);
-                appendView(url, grid);
-                // ajax(url, 'get', {}, function(res) {
-                //    console.log(res);
-                    
-                // });
+            $(() => {
+                let page = 1;
+                $('.view-more-product').click(function(e) {
+                    e.preventDefault();
+                    const url = $(this).attr('href') + `?page=${++page}`;
+                    const grid = $('.product-grid');
+                    appendView(url, grid);
+                });
             });
         </script>
     @endpush

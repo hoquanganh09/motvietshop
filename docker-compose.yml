@@ -1,0 +1,44 @@
+services:
+  php-fpm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: motviet
+    restart: always
+    volumes:
+      - app_data:/app
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - 9999:80
+    command: ["nginx", "-g", "daemon off;"]
+    volumes:
+      - app_data:/app
+      - ./nginx_default.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+    - php-fpm
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: doan_banquanao
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: my_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 9000:80
+    environment:
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+volumes:
+ app_data:
