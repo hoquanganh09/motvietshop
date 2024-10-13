@@ -6,9 +6,11 @@ use App\Actions\Client\Auth\LoginAction;
 use App\Actions\Client\Auth\LoginSocialAction;
 use App\Actions\Client\Auth\RegisterAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Client\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Client\Auth\LoginRequest;
 use App\Http\Requests\Client\Auth\RegisterRequest;
 use App\Jobs\Client\SendMailVerifyEmailJob;
+use App\Jobs\SendMailForgotPasswordJon;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,7 +59,7 @@ class AuthController extends Controller
     {
         $user = app()->make(LoginSocialAction::class)->handle();
 
-        Auth::login($user);
+        Auth::login($user, true);
 
         return to_route('client.home.index');
     }
@@ -81,5 +83,17 @@ class AuthController extends Controller
         $request->fulfill();
 
         return to_route('client.home.profile');
+    }
+
+    public function forgotPassword()
+    {
+        return view('client.auth.forgot_password');
+    }
+
+    public function handleForgotPassword(ForgotPasswordRequest $request)
+    {
+        SendMailForgotPasswordJon::dispatch($request->email);
+
+        return redirect()->back()->with('success', 'Vui lòng kiểm tra email để đặt lại mật khẩu');
     }
 }

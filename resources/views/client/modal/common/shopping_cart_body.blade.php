@@ -30,7 +30,7 @@
                         aria-label="Decrement quantity">
                         <i class="ci-minus"></i>
                     </button>
-                    <input type="number" class="form-control form-control-sm" value="{{ $item['quantity'] }}" readonly="">
+                    <input data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="number" class="input-quantity-cart form-control form-control-sm" value="{{ $item['quantity'] }}">
                     <button data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="button" class="btn-increment btn btn-icon btn-sm"
                         aria-label="Increment quantity">
                         <i class="ci-plus"></i>

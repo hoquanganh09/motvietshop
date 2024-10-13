@@ -18,11 +18,23 @@ async function ajax(url = '', method = 'get', data = {}, callback = undefined, e
     }
 }
 
-function loadView(url, view = undefined, isJquery = true) {
+function ajaxWithLoading(url = '', method = 'get', data = {}, callback = undefined, error = undefined) {
+    $('#ajax-loading').show();
+    ajax(url, method, data, function (res) {
+        callback && callback(res);
+        $('#ajax-loading').hide();
+    }, function (e) {
+        $('#ajax-loading').hide();
+        error && error(e);
+    });
+} 
+
+function loadView(url, view = undefined, isJquery = true, withLoading = false) {
     if (view == undefined) {
         view = $('#view_ajax');
     }
-    ajax(url, 'get', {}, function (e) {
+    const func = withLoading ? ajaxWithLoading : ajax;
+    func(url, 'get', {}, function (e) {
         if (isJquery) {
             view.html(e.data);
         }

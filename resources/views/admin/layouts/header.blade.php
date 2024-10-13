@@ -52,7 +52,7 @@
             </div>
 
             <div class="app-navbar flex-shrink-0">
-                <div class="app-navbar-item align-items-stretch ms-1 ms-lg-3">
+                <div class="d-none app-navbar-item align-items-stretch ms-1 ms-lg-3">
                     <div id="kt_header_search" class="header-search d-flex align-items-stretch"
                         data-kt-search-keypress="true" data-kt-search-min-length="2" data-kt-search-enter="enter"
                         data-kt-search-layout="menu" data-kt-menu-trigger="auto" data-kt-menu-overflow="false"
@@ -109,44 +109,10 @@
 
                             <!--begin::Menu item-->
                             <div class="menu-item px-5">
-                                <a href="/keen/demo1/account/overview.html" class="menu-link px-5">
-                                    My Profile
+                                <a href="{{ route('admin.home.profile', auth('admin')->id()) }}" class="menu-link px-5">
+                                    Thông tin cá nhân
                                 </a>
-                            </div>
-                            <!--end::Menu item-->
-
-                            <!--begin::Menu item-->
-                            <div class="menu-item px-5">
-                                <a href="/keen/demo1/apps/projects/list.html" class="menu-link px-5">
-                                    <span class="menu-text">My Projects</span>
-                                    <span class="menu-badge">
-                                        <span class="badge badge-light-danger badge-circle fw-bold fs-7">3</span>
-                                    </span>
-                                </a>
-                            </div>
-                            <!--end::Menu item-->
-
-                            <!--begin::Menu item-->
-                            <div class="menu-item px-5">
-                                <a href="/keen/demo1/account/statements.html" class="menu-link px-5">
-                                    My Statements
-                                </a>
-                            </div>
-                            <!--end::Menu item-->
-
-                            <!--begin::Menu separator-->
-                            <div class="separator my-2"></div>
-                            <!--end::Menu separator-->
-
-                            <!--end::Menu item-->
-
-                            <!--begin::Menu item-->
-                            <div class="menu-item px-5 my-1">
-                                <a href="/keen/demo1/account/settings.html" class="menu-link px-5">
-                                    Account Settings
-                                </a>
-                            </div>
-                            <!--end::Menu item-->
+                            </div>   
 
                             <!--begin::Menu item-->
                             <div class="menu-item px-5">

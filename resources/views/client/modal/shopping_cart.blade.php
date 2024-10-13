@@ -81,6 +81,19 @@
                 
             });
 
+            $(document).on('input', '.count-input .input-quantity-cart', function(e) {
+                const input = $(this).closest('.count-input').find('input');
+                const url = this.dataset.url;
+                const parent = $(this).closest('.cart-item');
+                const inputs = $(`.cart-item[data-key="${parent[0].dataset.key}"] .count-input input`);
+                
+                const val = parseInt(input.val());
+                inputs.val(val);
+
+                updateQuantity(url, input);
+                
+            });
+
             function updateQuantity(url, input) {
                 if (clearTimeOut != null) {
                     clearTimeout(clearTimeOut);

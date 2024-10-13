@@ -3,7 +3,8 @@
         <thead class="bg-light">
             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
                 <th style="width: 40%" class="pe-2 text-nowrap">Tên</th>
-                <th style="width: 40%" class="pe-2 text-nowrap">Thuộc phân loại</th>
+                <th style="width: 30%" class="pe-2 text-nowrap">Thuộc phân loại</th>
+                <th style="width: 10%" class="pe-2 text-nowrap">Số sản phẩm</th>
                 <th style="width: 10%" class="pe-2 text-nowrap">Ngày tạo</th>
                 <th style="width: 10%" class="pe-2 text-nowrap"></th>
             </tr>
@@ -16,6 +17,9 @@
                     </td>
                     <td>
                         {{ $item->category->name }}
+                    </td>
+                    <td>
+                        {{ $item->products->count() }}
                     </td>
                     <td class="text-nowrap">{{ $item->created_at }}</td>
                     <td class="text-end text-nowrap">

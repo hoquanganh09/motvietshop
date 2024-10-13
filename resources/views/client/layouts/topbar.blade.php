@@ -21,12 +21,11 @@
               }
             }">
                     <div class="swiper-wrapper min-w-0">
-                        <div class="swiper-slide text-truncate text-center">🎉 Free Shipping on orders over $250. <span
-                                class="d-none d-sm-inline">Don't miss a discount!</span></div>
-                        <div class="swiper-slide text-truncate text-center">💰 Money back guarantee. <span
-                                class="d-none d-sm-inline">We return money within 30 days.</span></div>
-                        <div class="swiper-slide text-truncate text-center">💪 Friendly 24/7 customer support. <span
-                                class="d-none d-sm-inline">We've got you covered!</span></div>
+                        <div class="swiper-slide text-truncate text-center">🎉 Miễn phí vận chuyển. <span
+                                class="d-none d-sm-inline">Đừng bỏ lỡ khuyến mãi!</span></div>
+                        <div class="swiper-slide text-truncate text-center">💰 Đảm bảo hoàn tiền. <span
+                                class="d-none d-sm-inline">Hoàn tiền trong vòng 30 ngày.</span></div>
+                        <div class="swiper-slide text-truncate text-center">💪 Hỗ trợ khách hàng nhiệt tình.</div>
                     </div>
                 </div>
                 <div class="nav ms-2">

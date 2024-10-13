@@ -6,6 +6,7 @@ use App\Enums\CartStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendMailOrderCreated;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
@@ -20,6 +21,11 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $cart = getCart(CartStatus::NotDisabled, 'final_cart');
+
+        if (count($cart) == 0) {
+            return back()->with('message', 'Không thể đặt hàng khi không có sản phẩm');
+        }
+
         $discount = getDiscount();
         $data = [
             'user_id' => Auth::id(),
@@ -57,6 +63,8 @@ class OrderController extends Controller
                 ]);
             }
 
+            SendMailOrderCreated::dispatch($order->user_id, $order);
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -79,8 +87,6 @@ class OrderController extends Controller
             if ($res['code'] == '00') {
                 return redirect($res['data']['checkoutUrl']);
             }
-
-            Log::error($res['des']);
 
             return abort(500);
         }
@@ -113,5 +119,31 @@ class OrderController extends Controller
             'header' => view('client.modal.common.order_detail_header', compact('order'))->render(),
             'footer' => view('client.modal.common.order_detail_footer', compact('order'))->render(),
         ]);
+    }
+
+    public function shipped(Order $order)
+    {
+        if (!$order->canReview('web')) {
+            return response()->json([
+                'message' => 'Không thể đổi trạng thái đơn hàng',
+            ], 400); 
+        }
+
+        $order->status = OrderStatus::SHIPPED->value;
+        $order->is_paid = 1;
+        $order->save();
+
+        return response()->json([
+            'message' => 'Đổi trạng thái đơn hàng thành công',
+            'header' => view('client.modal.common.order_detail_header', compact('order'))->render(),
+            'footer' => view('client.modal.common.order_detail_footer', compact('order'))->render(),
+        ]);
+    }
+
+    public function showNeedReviews(Order $order)
+    {
+        $order->load(['orderDetails', 'reviews', 'orderDetails.product', 'orderDetails.product.images', 'orderDetails.product.kind']);
+
+        return response()->view('client.modal.common.product_review_body', compact('order'));
     }
 }

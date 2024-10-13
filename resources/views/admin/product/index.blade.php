@@ -55,7 +55,7 @@
                             <!--begin::Toolbar-->
                             <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base"
                                 data-select2-id="select2-data-161-pji5">
-                                <x-admin.filter id="filter_product" />
+                                <x-admin.filter id="filter_product" :data="$filters" />
                                 <!--begin::Add user-->
                                 <a class="btn btn-primary" href="{{ route('admin.product.create') }}">
                                     <i class="ki-duotone ki-plus fs-2"></i> Thêm sản phẩm

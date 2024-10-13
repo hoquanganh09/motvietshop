@@ -27,7 +27,7 @@
                                     <h2 class="display-4 text-uppercase mb-4 mb-xl-5">
                                         {{ $item->content }}
                                     </h2>
-                                    <a class="btn btn-lg btn-outline-dark" href="shop-catalog-fashion.html">
+                                    <a class="btn btn-lg btn-outline-dark" href="{{ route('client.home.shop') }}">
                                         Xem ngay
                                         <i class="ci-arrow-up-right fs-lg ms-2 me-n1"></i>
                                     </a>

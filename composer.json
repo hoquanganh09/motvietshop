@@ -6,11 +6,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.0",
         "laravel/framework": "^11.9",
         "laravel/scout": "^10.11",
         "laravel/socialite": "^5.15",
         "laravel/tinker": "^2.9",
-        "sontx/laravel-dod": "^1.0"
+        "sontx/laravel-dod": "^1.0",
+        "spatie/laravel-pdf": "^1.5"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",

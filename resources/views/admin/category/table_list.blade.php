@@ -3,7 +3,8 @@
         <thead class="bg-light">
             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
                 <th style="width: 15%" class="pe-2 text-nowrap">Ảnh</th>
-                <th style="width: 65%" class="pe-2 text-nowrap">Tên</th>
+                <th style="width: 45%" class="pe-2 text-nowrap">Tên</th>
+                <th style="width: 20%" class="pe-2 text-nowrap">Số thể loại</th>
                 <th style="width: 10%" class="pe-2 text-nowrap">Ngày tạo</th>
                 <th style="width: 10%" class="pe-2 text-nowrap"></th>
             </tr>
@@ -16,6 +17,9 @@
                     </td>
                     <td class="text-nowraps">
                         {{ $item->name }}
+                    </td>
+                    <td>
+                        {{ $item->kinds->count() }}
                     </td>
                     <td class="text-nowrap">{{ $item->created_at }}</td>
                     <td class="text-end text-nowrap">

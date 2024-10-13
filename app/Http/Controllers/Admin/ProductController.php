@@ -12,10 +12,9 @@ use App\Actions\Admin\Size\GetListSizeAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Product\CreateProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
+use App\Models\Kind;
 use App\Models\Product;
 use Illuminate\Http\Request;
-
-use function Laravel\Prompts\search;
 
 class ProductController extends Controller
 {
@@ -26,10 +25,12 @@ class ProductController extends Controller
     {
         $filters = [
             'search' => request()->input('search', ''),
+            'is_active' => request()->input('is_active', ''),
+            'kind_id' => request()->input('kind_id', ''),
         ];
 
         $products = app()->make(GetListProductAction::class)->handle(
-            search: $filters['search'],
+            filters: $filters,
             hasPaginate: true,
         );
 
@@ -37,7 +38,23 @@ class ProductController extends Controller
             return response()->view('admin.product.table_list', compact('products'));
         }
 
-        return view('admin.product.index', compact('products'));
+        $filters = [
+            [
+                'name' => 'is_active',
+                'label' => 'Trạng thái',
+                'data' => [
+                    '1' => 'Đang hoạt động',
+                    '0' => 'Không hoạt động',
+                ],
+            ],
+            [
+                'name' => 'kind_id',
+                'label' => 'Thể loại',
+                'data' => Kind::query()->pluck('name', 'id')->toArray(),
+            ],
+        ];
+
+        return view('admin.product.index', compact('products', 'filters'));
     }
 
     /**

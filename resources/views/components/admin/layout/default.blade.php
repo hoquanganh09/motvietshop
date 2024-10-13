@@ -24,13 +24,11 @@
     <script src="{{ asset('plugins/axios/axios.min.js') }}"></script>
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+    <script src="{{ asset('js/customAxios.js') }}"></script>
+    <script src="{{ asset('js/customSweetalert2.js') }}"></script>
 @endpush
 
 @push('js')
-    <script src="{{ asset('js/customAxios.js') }}"></script>
-    <script src="{{ asset('js/customSweetalert2.js') }}"></script>
-
     <script>
         window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
         window.axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';

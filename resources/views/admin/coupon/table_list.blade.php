@@ -20,7 +20,7 @@
                     <td>{{ $item->amount }}</td>
                     <td>
                         {{ $item->expiration_date }}
-                        @if ($item->isExpired())
+                        @if (!$item->isExpired())
                             <span class="badge badge-success">Còn hạn</span>
                         @else
                             <span class="badge badge-danger">Hết hạn</span>

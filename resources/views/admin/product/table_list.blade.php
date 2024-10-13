@@ -6,9 +6,10 @@
                 <th style="width: 10%" class="pe-2 text-nowrap text-center">Thể loại</th>
                 <th style="width: 10%" class="pe-2 text-nowrap text-center">Giá cũ</th>
                 <th style="width: 10%" class="pe-2 text-nowrap text-center">Giá mới</th>
-                <th style="width: 10%" class="pe-2 text-nowrap text-center">Số lượng</th>
+                <th style="width: 5%" class="pe-2 text-nowrap text-center">Số lượng</th>
                 <th style="width: 10%" class="pe-2 text-nowrap text-center">Trạng thái</th>
-                <th style="width: 10%" class="pe-2 text-nowrap">Cập nhật</th>
+                <th style="width: 10%" class="pe-2 text-nowrap text-center">Đánh giá</th>
+                <th style="width: 5%" class="pe-2 text-nowrap">Cập nhật</th>
                 <th style="width: 10%" class="pe-2 text-nowrap"></th>
             </tr>
         </thead>
@@ -37,7 +38,19 @@
                     <td class="text-nowrap text-center">
                         {{ $item->getStatusLabel() }}
                     </td>
-                    <td class="text-nowrap">{{ $item->created_at }}</td>
+                    <td class="text-nowrap text-center">
+                        <div class="rating justify-content-end">
+                            @php
+                                $avg = $item->reviews->avg('rating');
+                            @endphp
+                            @for ($i = 1; $i <= 5; $i++)
+                                <div class="rating-label @if ($i <= $avg) checked @endif">
+                                    <i class="ki-duotone ki-star fs-6"></i>
+                                </div>
+                            @endfor
+                        </div>
+                    </td>
+                    <td class="text-nowraps text-center">{{ $item->updated_at }}</td>
                     <td class="text-end text-nowrap">
                         <a class="btn-edit-product btn btn-default btn-sm"
                             href="{{ route('admin.product.edit', $item->id) }}">

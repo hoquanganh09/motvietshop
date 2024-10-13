@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use App\Enums\ThongKeType;
+use App\Traits\ModelScopeTrait;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, SearchableTrait;
+    use HasFactory, Notifiable, SearchableTrait, ModelScopeTrait;
 
     const ACTIVE = 1;
     const INACTIVE = 0;
@@ -31,6 +35,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_active',
         'provider',
         'social_id',
+        'has_send_email_shipping',
+        'has_send_email_order',
     ];
 
     /**
@@ -99,5 +105,27 @@ class User extends Authenticatable implements MustVerifyEmail
     public function addresses()
     {
         return $this->hasMany(ShippingAddress::class);
+    }
+
+    public static function getNewCustomersByType(string $type, bool $isPast = false)
+    {
+        $query =  self::query()->active()->filter($type, $isPast);
+
+        return $query->get();
+    }
+
+    public function isAdmin()
+    {
+        return $this->role == Role::ADMIN;
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->role == Role::SUPER_ADMIN;
+    }
+
+    public function isRoot()
+    {
+        return $this->role == Role::ROOT || $this->is_admin == 1;
     }
 }

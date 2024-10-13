@@ -5,12 +5,13 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CouponController;
 use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\ShippingAddressController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Route;
 
-Route::name('client.')->group(function () {
+Route::name('client.')->middleware('visitor')->group(function () {
     Route::middleware('customAuth:web')->group(function () {
         Route::controller(ClientController::class)->as('home.')->group(function () {
             Route::get('/san-pham-yeu-thich', 'wishlist')->name('wishlist');
@@ -35,6 +36,7 @@ Route::name('client.')->group(function () {
             Route::put('/doi-mat-khau', 'changePassword')->name('changePassword');
             Route::put('/doi-lien-he', 'changeContact')->name('changeContact');
             Route::put('/doi-thong-tin', 'changeInfo')->name('changeInfo');
+            Route::post('/doi-thong-bao', 'changeNoti')->name('changeNoti');
         });
 
         Route::controller(ShippingAddressController::class)->as('shippingAddress.')->group(function () {
@@ -51,12 +53,20 @@ Route::name('client.')->group(function () {
             Route::post('/dat-hang', 'store')->name('store');
             Route::get('/show-order-detail/{order}', 'show')->name('show');
             Route::put('/huy-don-hang/{order}', 'cancel')->name('cancel');
+            Route::put('/nhan-hang-thanh-cong/{order}', 'shipped')->name('shipped');
+            Route::get('/show-need-review/{order}', 'showNeedReviews')->name('showNeedReviews');
+        });
+
+        Route::controller(ReviewController::class)->as('review.')->group(function () {
+            Route::post('/danh-gia', 'store')->name('store');
         });
     });
 
     Route::middleware('customGuest:web')->group(function () {
         Route::controller(AuthController::class)->as('auth.')->group(function () {
             Route::get('/dang-nhap', 'login')->name('login');
+            Route::get('/quen-mat-khau', 'forgotPassword')->name('forgotPassword');
+            Route::post('/xy-ly-quen-mat-khau', 'handleForgotPassword')->name('handleForgotPassword');
             Route::post('/dang-nhap', 'handleLogin')->name('handleLogin');
             Route::get('/dang-ky', 'register')->name('register');
             Route::post('/dang-ky', 'handleRegister')->name('handleRegister');

@@ -9,7 +9,7 @@
     <nav class="container pt-2 pt-xxl-3 my-3 my-md-4" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('client.home.index') }}">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a href="shop-catalog-fashion.html">Cửa hàng</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('client.home.shop') }}">Cửa hàng</a></li>
             <li class="breadcrumb-item active" aria-current="page">Thông tin sản phẩm</li>
         </ol>
     </nav>
@@ -70,13 +70,18 @@
                     <!-- Reviews -->
                     <a class="d-none d-md-flex align-items-center gap-2 text-decoration-none mb-3" href="#reviews">
                         <div class="d-flex gap-1 fs-sm">
-                            <i class="ci-star-filled text-warning"></i>
-                            <i class="ci-star-filled text-warning"></i>
-                            <i class="ci-star-filled text-warning"></i>
-                            <i class="ci-star-filled text-warning"></i>
-                            <i class="ci-star text-body-tertiary opacity-75"></i>
+                            @php
+                                $avg = $product->reviews->avg('rating');
+                            @endphp
+                            @for ($i = 0; $i < 5; $i++)
+                                @if ($i < round($avg, 0, 2))
+                                    <i class="ci-star-filled text-warning"></i>
+                                @else
+                                    <i class="ci-star text-body-tertiary opacity-75"></i>
+                                @endif
+                            @endfor
                         </div>
-                        <span class="text-body-tertiary fs-sm">23 reviews</span>
+                        <span class="text-body-tertiary fs-sm">{{ $product->reviews->count() }} đánh giá</span>
                     </a>
 
                     <!-- Title -->
@@ -98,7 +103,8 @@
                         </label>
                         <div class="d-flex flex-wrap gap-2" data-binded-label="#colorOption">
                             @foreach ($product->colors as $color)
-                                <input data-label="{{ $color->color->label }}" name="color" type="radio" class="btn-check" value="{{ $color->color_id }}"
+                                <input data-label="{{ $color->color->label }}" name="color" type="radio"
+                                    class="btn-check" value="{{ $color->color_id }}"
                                     id="product_color_{{ $product->id }}_{{ $color->id }}"
                                     @if ($loop->first) checked @endif>
                                 <label for="product_color_{{ $product->id }}_{{ $color->id }}"
@@ -139,14 +145,16 @@
                                 aria-label="Decrement quantity">
                                 <i class="ci-minus"></i>
                             </button>
-                            <input name="quantity" type="number" class="form-control form-control-lg" min="1" value="1"
-                                readonly="">
+                            <input data-old_value="1" name="quantity" type="number"
+                                class="btn-quantity-detail form-control form-control-lg" min="1"
+                                value="1">
                             <button type="button" class="btn btn-icon btn-lg" data-increment=""
                                 aria-label="Increment quantity">
                                 <i class="ci-plus"></i>
                             </button>
                         </div>
-                        <button @if($product->sizes->count() == 0 || $product->colors->count() == 0) disabled @endif data-url="{{ route('client.cart.addToCart', $product->id) }}" type="button"
+                        <button @if ($product->sizes->count() == 0 || $product->colors->count() == 0) disabled @endif
+                            data-url="{{ route('client.cart.addToCart', $product->id) }}" type="button"
                             class="add-to-cart btn btn-lg btn-dark w-100">Thêm vào giỏ hàng</button>
                     </div>
 
@@ -171,13 +179,14 @@
 
                     <!-- Stock status -->
                     <div class="d-flex flex-wrap justify-content-between fs-sm mb-3">
-                        <span class="fw-medium text-dark-emphasis me-2">🔥 Hurry up! The sale is coming to an
-                            end</span>
-                        <span><span class="fw-medium text-dark-emphasis">6</span> items in stock!</span>
+                        <span class="fw-medium text-dark-emphasis me-2">🔥 Nhanh lên! Chương trình giảm giá đang đến
+                            gần</span>
+                        <span><span class="fw-medium text-dark-emphasis">{{ $product->stock }}</span> sản phẩm trong
+                            kho!</span>
                     </div>
                     <div class="progress" role="progressbar" aria-label="Left in stock" aria-valuenow="25"
                         aria-valuemin="0" aria-valuemax="100" style="height: 4px">
-                        <div class="progress-bar rounded-pill" style="width: 25%"></div>
+                        <div class="progress-bar rounded-pill" style="width: 100%"></div>
                     </div>
                 </div>
             </div>
@@ -256,7 +265,7 @@
                 <button type="button" class="nav-link" id="reviews-tab" data-bs-toggle="tab"
                     data-bs-target="#reviews-tab-pane" role="tab" aria-controls="reviews-tab-pane"
                     aria-selected="false">
-                    Đánh giá<span class="d-none d-md-inline">&nbsp;(23)</span>
+                    Đánh giá<span class="d-none d-md-inline">&nbsp;({{ $reviews->total() }})</span>
                 </button>
             </li>
         </ul>
@@ -278,32 +287,33 @@
                 <div class="row row-cols-1 row-cols-md-2">
                     <div class="col mb-3 mb-md-0">
                         <div class="pe-lg-2 pe-xl-3">
-                            <h6>Delivery</h6>
-                            <p>We strive to deliver your denim midi skirt with pockets to you as quickly as possible.
-                                Our estimated delivery times are as follows:</p>
+                            <h6>Giao hàng</h6>
+                            <p>Thời gian giao hàng ước tính của chúng tôi như sau:</p>
                             <ul class="list-unstyled">
-                                <li>Standard delivery: <span class="text-dark-emphasis fw-semibold">Within 3-7 business
-                                        days</span></li>
-                                <li>Express delivery: <span class="text-dark-emphasis fw-semibold">Within 1-3 business
-                                        days</span></li>
+                                <li>Nội thành: <span class="text-dark-emphasis fw-semibold">1-2 ngày</span></li>
+                                <li>Ngoại thành: <span class="text-dark-emphasis fw-semibold">5-7 ngày</span></li>
                             </ul>
-                            <p>Please note that delivery times may vary depending on your location and any ongoing
-                                promotions or holidays. You can track your order using the provided tracking number once
-                                your package has been dispatched.</p>
+                            <p>Xin lưu ý rằng thời gian giao hàng có thể thay đổi tùy thuộc vào vị trí của bạn và mọi
+                                hoạt động đang diễn ra.
+                                chương trình khuyến mãi hoặc ngày lễ. Bạn có thể theo dõi đơn hàng của mình bằng số theo
+                                dõi được cung cấp một lần
+                                gói hàng của bạn đã được gửi đi.</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="ps-lg-2 ps-xl-3">
-                            <h6>Returns</h6>
-                            <p>We want you to be completely satisfied with your denim midi skirt with pockets. If for
-                                any reason you are not happy with your purchase, you can return it within 30 days of
-                                receiving your order for a full refund or exchange.</p>
-                            <p>To be eligible for a return, the skirt must be unused, unwashed, and in its original
-                                condition with tags attached. Please ensure that all packaging is intact when returning
-                                the item.</p>
-                            <p class="mb-0">To initiate a return, please contact our customer service team with your
-                                order number and reason for the return. We will provide you with a return shipping label
-                                and instructions on how to proceed. Please note that shipping fees are non-refundable.
+                            <h6>Trả hàng</h6>
+                            <p>Chúng tôi muốn bạn hoàn toàn hài lòng với sản phẩm của mình. Nếu vì
+                                bất kỳ lý do gì bạn không hài lòng với giao dịch mua hàng của mình, bạn có thể trả lại
+                                trong vòng 30 ngày kể từ ngày
+                                nhận được đơn đặt hàng của bạn để được hoàn lại tiền đầy đủ hoặc trao đổi.</p>
+                            <p>Để đủ điều kiện trả lại, sản phẩm chưa được sử dụng, chưa giặt và còn nguyên trạng
+                                tình trạng có thẻ đính kèm. Hãy đảm bảo rằng tất cả bao bì còn nguyên vẹn khi trả lại
+                                món đồ.</p>
+                            <p class="mb-0">Để bắt đầu hoàn trả, vui lòng liên hệ với nhóm dịch vụ khách hàng của
+                                chúng tôi cùng với
+                                số thứ tự và lý do trả lại. Chúng tôi sẽ cung cấp cho bạn nhãn vận chuyển trả lại
+                                và hướng dẫn cách tiến hành. Xin lưu ý rằng phí vận chuyển sẽ không được hoàn lại.
                             </p>
                         </div>
                     </div>
@@ -316,243 +326,56 @@
                 <!-- Heading + Add review button -->
                 <div class="d-sm-flex align-items-center justify-content-between border-bottom pb-2 pb-sm-3">
                     <div class="mb-3 me-sm-3">
-                        <h2 class="h5 pb-2 mb-1">Customer reviews</h2>
+                        <h2 class="h5 pb-2 mb-1">Đánh giá của khách hàng</h2>
                         <div class="d-flex align-items-center text-body-secondary fs-sm">
                             <div class="d-flex gap-1 me-2">
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star text-body-tertiary opacity-75"></i>
+                                @php
+                                    $avg = $product->reviews->avg('rating');
+                                @endphp
+                                @for ($i = 0; $i < 5; $i++)
+                                    @if ($i < round($avg, 0, 2))
+                                        <i class="ci-star-filled text-warning"></i>
+                                    @else
+                                        <i class="ci-star text-body-tertiary opacity-75"></i>
+                                    @endif
+                                @endfor
                             </div>
-                            Based on 23 reviews
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-outline-dark mb-3" data-bs-toggle="modal"
-                        data-bs-target="#reviewForm">Leave a review</button>
-                </div>
-
-                <!-- Review -->
-                <div class="border-bottom py-4">
-                    <div class="row py-sm-2">
-                        <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
-                            <div class="d-flex h6 mb-2">
-                                Rafael Marquez
-                                <i class="ci-check-circle text-success mt-1 ms-2" data-bs-toggle="tooltip"
-                                    data-bs-custom-class="tooltip-sm" title="Verified customer"></i>
-                            </div>
-                            <div class="fs-sm mb-2 mb-md-3">June 25, 2024</div>
-                            <div class="d-flex gap-1 fs-sm">
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-8 col-lg-9">
-                            <p class="mb-md-4">Absolutely love this chair! It's exactly what I was looking for to
-                                complete my Scandinavian-themed living room. The wooden legs add a touch of warmth and
-                                the design is timeless. Comfortable and sturdy, couldn't be happier with my purchase!
-                            </p>
-                            <div class="d-sm-flex justify-content-between">
-                                <div
-                                    class="d-flex align-items-center fs-sm fw-medium text-dark-emphasis pb-2 pb-sm-0 mb-1 mb-sm-0">
-                                    <i class="ci-check fs-base me-1" style="margin-top: .125rem"></i>
-                                    Yes, I recommend this product
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="fs-sm fw-medium text-dark-emphasis me-1">Helpful?</div>
-                                    <button type="button" class="btn btn-sm btn-secondary">
-                                        <i class="ci-thumbs-up fs-sm ms-n1 me-1"></i>
-                                        0
-                                    </button>
-                                </div>
-                            </div>
+                            {{ $avg }}/5 sao dựa trên {{ $reviews->total() }} đánh giá
                         </div>
                     </div>
                 </div>
 
-                <!-- Review -->
-                <div class="border-bottom py-4">
-                    <div class="row py-sm-2">
-                        <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
-                            <div class="d-flex h6 mb-2">
-                                Bessie Cooper
-                                <i class="ci-check-circle text-success mt-1 ms-2" data-bs-toggle="tooltip"
-                                    data-bs-custom-class="tooltip-sm" title="Verified customer"></i>
-                            </div>
-                            <div class="fs-sm mb-2 mb-md-3">April 8, 2024</div>
-                            <div class="d-flex gap-1 fs-sm">
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star text-body-tertiary opacity-75"></i>
-                                <i class="ci-star text-body-tertiary opacity-75"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-8 col-lg-9">
-                            <p class="mb-md-4">While the design of the chair is nice and it does add a touch of retro
-                                vibe to my space, I found the quality to be lacking. After just a few weeks of use, one
-                                of the legs started to wobble, and the seat isn't as comfortable as I had hoped.
-                                Disappointed with the durability. Additionally, the assembly process was a bit
-                                frustrating as some of the screws didn't align properly with the holes, requiring extra
-                                effort to secure them in place. Overall, while it looks good, I expected better quality
-                                for the price.</p>
-                            <div class="d-sm-flex justify-content-between">
-                                <div
-                                    class="d-flex align-items-center fs-sm fw-medium text-dark-emphasis pb-2 pb-sm-0 mb-1 mb-sm-0">
-                                    <i class="ci-close fs-base me-1" style="margin-top: .125rem"></i>
-                                    No, I don't recommend this product
+                @foreach ($reviews as $item)
+                    <div class="border-bottom py-4">
+                        <div class="row py-sm-2">
+                            <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
+                                <div class="d-flex h6 mb-2">
+                                    {{ $item->user->fullname }}
+                                    @if ($item->user->isEmailVerified())
+                                        <i class="ci-check-circle text-success mt-1 ms-2" data-bs-toggle="tooltip"
+                                            data-bs-custom-class="tooltip-sm" title="Khách hàng đã xác thực"></i>
+                                    @endif
                                 </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="fs-sm fw-medium text-dark-emphasis me-1">Helpful?</div>
-                                    <button type="button" class="btn btn-sm btn-secondary">
-                                        <i class="ci-thumbs-up fs-sm ms-n1 me-1"></i>
-                                        3
-                                    </button>
+                                <div class="fs-sm mb-2 mb-md-3">{{ $item->created_at->format('d/m/Y') }}</div>
+                                <div class="d-flex gap-1 fs-sm">
+                                    @for ($i = 0; $i < 5; $i++)
+                                        @if ($i < $item->rating)
+                                            <i class="ci-star-filled text-warning"></i>
+                                        @else
+                                            <i class="ci-star text-body-tertiary opacity-75"></i>
+                                        @endif
+                                    @endfor
                                 </div>
+                            </div>
+                            <div class="col-md-8 col-lg-9">
+                                <p class="mb-md-4">{{ $item->note }}
+                                </p>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Review -->
-                <div class="border-bottom py-4">
-                    <div class="row py-sm-2">
-                        <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
-                            <div class="d-flex h6 mb-2">Savannah Nguyen</div>
-                            <div class="fs-sm mb-2 mb-md-3">March 30, 2024</div>
-                            <div class="d-flex gap-1 fs-sm">
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star text-body-tertiary opacity-75"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-8 col-lg-9">
-                            <p class="mb-md-4">Great addition to our dining room! The chair looks fantastic and is
-                                quite comfortable for short sits. Assembly was a breeze, and the quality seems decent
-                                for the price. Overall, satisfied with the purchase.</p>
-                            <div class="d-sm-flex justify-content-between">
-                                <div
-                                    class="d-flex align-items-center fs-sm fw-medium text-dark-emphasis pb-2 pb-sm-0 mb-1 mb-sm-0">
-                                    <i class="ci-check fs-base me-1" style="margin-top: .125rem"></i>
-                                    Yes, I recommend this product
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="fs-sm fw-medium text-dark-emphasis me-1">Helpful?</div>
-                                    <button type="button" class="btn btn-sm btn-secondary">
-                                        <i class="ci-thumbs-up fs-sm ms-n1 me-1"></i>
-                                        7
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Review -->
-                <div class="border-bottom py-4">
-                    <div class="row py-sm-2">
-                        <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
-                            <div class="d-flex h6 mb-2">Daniel Adams</div>
-                            <div class="fs-sm mb-2 mb-md-3">March 16, 2024</div>
-                            <div class="d-flex gap-1 fs-sm">
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-8 col-lg-9">
-                            <p class="mb-md-4">Couldn't be happier with this chair! It's not only stylish but also
-                                incredibly comfortable. The size is perfect for our space, and the wooden legs feel
-                                sturdy. Definitely recommend it to anyone looking for a chic and functional seating
-                                option.</p>
-                            <div class="d-sm-flex justify-content-between">
-                                <div
-                                    class="d-flex align-items-center fs-sm fw-medium text-dark-emphasis pb-2 pb-sm-0 mb-1 mb-sm-0">
-                                    <i class="ci-check fs-base me-1" style="margin-top: .125rem"></i>
-                                    Yes, I recommend this product
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="fs-sm fw-medium text-dark-emphasis me-1">Helpful?</div>
-                                    <button type="button" class="btn btn-sm btn-secondary">
-                                        <i class="ci-thumbs-up fs-sm ms-n1 me-1"></i>
-                                        14
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Review -->
-                <div class="border-bottom py-4">
-                    <div class="row py-sm-2">
-                        <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
-                            <div class="d-flex h6 mb-2">Kristin Watson</div>
-                            <div class="fs-sm mb-2 mb-md-3">February 7, 2024</div>
-                            <div class="d-flex gap-1 fs-sm">
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star-filled text-warning"></i>
-                                <i class="ci-star text-body-tertiary opacity-75"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-8 col-lg-9">
-                            <p class="mb-md-4">The chair is nice, but it's not the most comfortable for extended
-                                periods of sitting. The wooden legs give it a nice aesthetic, but they seem a bit
-                                fragile. It's a decent chair for occasional use, but I wouldn't recommend it for daily
-                                use or long sitting sessions.</p>
-                            <div class="d-sm-flex justify-content-between">
-                                <div
-                                    class="d-flex align-items-center fs-sm fw-medium text-dark-emphasis pb-2 pb-sm-0 mb-1 mb-sm-0">
-                                    <i class="ci-check fs-base me-1" style="margin-top: .125rem"></i>
-                                    Yes, I recommend this product
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="fs-sm fw-medium text-dark-emphasis me-1">Helpful?</div>
-                                    <button type="button" class="btn btn-sm btn-secondary">
-                                        <i class="ci-thumbs-up fs-sm ms-n1 me-1"></i>
-                                        9
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                @endforeach
                 <!-- Pagination -->
-                <nav class="mt-3 pt-2 pt-md-3" aria-label="Reviews pagination">
-                    <ul class="pagination">
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link">
-                                1
-                                <span class="visually-hidden">(current)</span>
-                            </span>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#!">2</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#!">3</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#!">4</a>
-                        </li>
-                        <li class="page-item">
-                            <span class="page-link pe-none">...</span>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#!">6</a>
-                        </li>
-                    </ul>
-                </nav>
+                {{ $reviews->links() }}
             </div>
         </div>
     </section>
@@ -560,7 +383,7 @@
     <!-- Viewed products (carousel) -->
     <section class="container pt-5 mt-2 mt-sm-3 mt-lg-4 mt-xl-5">
         <div class="d-flex align-items-center justify-content-between pt-1 pt-lg-0 pb-3 mb-2 mb-sm-3">
-            <h2 class="mb-0 me-3">Sản phẩm đã xem</h2>
+            <h2 class="mb-0 me-3">Sản phẩm liên quan</h2>
 
             <!-- Slider prev/next buttons -->
             <div class="d-flex gap-2">
@@ -627,7 +450,12 @@
                         return;
                     }
 
-                    ajax(url, 'post', data, function (res) {
+                    if (quantityEl.val() == '') {
+                        toast('Số lượng không hợp lệ', 'warning');
+                        return;
+                    }
+
+                    ajax(url, 'post', data, function(res) {
                         cartEl.find('.offcanvas-body').html(res.data.body);
                         cartEl.find('.offcanvas-footer').html(res.data.footer);
                         $('[data-bs-target="#shoppingCart"] > span').html(res.data.count);
@@ -639,7 +467,7 @@
                 });
 
                 // change color
-                colorEl.on('change', function () {
+                colorEl.on('change', function() {
                     const parent = $(this).closest('.color-container');
                     parent.find('.form-label').html($(this).dataset('label'));
                 });
@@ -662,6 +490,16 @@
                             toast(res.data.message);
                         });
                     }, timer);
+                });
+
+                $(document).on('input', '.btn-quantity-detail', function() {
+                    const val = $(this).val();
+
+                    if (val == '') {
+                        $(this).val($(this)[0].dataset.old_value);
+                    } else {
+                        $(this)[0].dataset.old_value = val;
+                    }
                 });
             });
         </script>

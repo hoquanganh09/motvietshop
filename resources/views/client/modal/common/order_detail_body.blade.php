@@ -2,13 +2,13 @@
 <div class="d-flex flex-column gap-3">
     @foreach ($order->orderDetails as $item)
         <div class="d-flex align-items-center">
-            <a class="flex-shrink-0" href="shop-product-general-electronics.html">
+            <a class="flex-shrink-0" href="{{ route('client.home.productDetail', $item->product->id) }}">
                 <img src="{{ $item->product->getThumbnail() }}" width="110" alt="product">
             </a>
             <div class="w-100 min-w-0 ps-2 ps-sm-3">
                 <h5 class="d-flex animate-underline mb-2">
                     <a class="d-block fs-sm fw-medium text-truncate animate-target"
-                        href="shop-product-general-electronics.html">{{ $item->product->name }}</a>
+                        href="{{ route('client.home.productDetail', $item->product->id) }}">{{ $item->product->name }}</a>
                 </h5>
                 <div class="h6 mb-2">{{ formatMoney($item->price) }}</div>
                 <div class="fs-xs">Size: {{ $item->size->name }}</div>

@@ -1,3 +1,5 @@
+https://cartzilla.createx.studio/home-fashion-v2.html
+https://preview.keenthemes.com/keen/demo1/pages/sitemap.html
 
 ### Features
 #### Frontend
@@ -52,4 +54,3 @@
 - Quản lý mã giảm giá
 - Cập nhật thông tin cá nhân
 - Đăng xuất
-

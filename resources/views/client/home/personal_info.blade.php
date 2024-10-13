@@ -230,8 +230,10 @@
                 document.querySelector('input[type=date]').showPicker();
             }
 
-            $('.resend-verify-email.text-secondary').on('click', function(e) {
+            $(document).on('click', '.resend-verify-email.text-secondary', function(e) {
                 e.preventDefault();
+                console.log(123);
+
             });
 
             @if (session()->has('success_verify_email'))

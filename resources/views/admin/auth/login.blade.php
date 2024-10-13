@@ -7,7 +7,9 @@
                 <div class="d-flex flex-center flex-column flex-lg-row-fluid">
                     <!--begin::Wrapper-->
                     <div class="w-lg-500px p-10 bg-white">
-
+                        <div class="d-flex justify-content-center mb-3">
+                            <img src="{{ getLogo() }}" alt="logo" class="img-fluid" width="200">
+                        </div>
                         <!--begin::Form-->
                         <form class="form w-100" action="{{ route('admin.auth.handleLogin') }}" method="POST">
                             @csrf

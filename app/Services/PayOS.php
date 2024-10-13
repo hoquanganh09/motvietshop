@@ -15,19 +15,20 @@ class PayOS
     public function __construct()
     {
         $this->request = Http::baseUrl(self::BASE_URL)->withHeaders([
-            'x-client-id' => env('PAYOS_CLIENT_ID'),
-            'x-api-key' => env('PAYOS_API_KEY'),
+            'x-client-id' => config('payos.client_id'),
+            'x-api-key' => config('payos.api_key'),
         ]);
     }
     public function createOrder(Order $order)
     {
+        $orderCode = $order->id + time();
         $cancelUrl = route('client.home.index');
         $des = $order->code;
         $returnUrl = route('client.home.orderSuccess');
         $expiredAt = time() + 86400;
-        $sig = "amount=" . $order->total . "&cancelUrl=" . $cancelUrl . "&description=" . $des . "&orderCode=" . $order->id . "&returnUrl=" . $returnUrl;
+        $sig = "amount=" . $order->total . "&cancelUrl=" . $cancelUrl . "&description=" . $des . "&orderCode=" . $orderCode . "&returnUrl=" . $returnUrl;
         $body = [
-            'orderCode' => $order->id,
+            'orderCode' => $orderCode,
             'amount' => $order->total,
             'description' => $des,
             "buyerName" => $order->fullname,
@@ -36,10 +37,13 @@ class PayOS
             "cancelUrl" => $cancelUrl,
             "returnUrl" => $returnUrl,
             "expiredAt" => $expiredAt,
-            "signature" => hash_hmac('sha256', $sig, env('PAYOS_CHECK_SUM_KEY')),
+            "signature" => hash_hmac('sha256', $sig, config('payos.checksum_key')),
         ];
 
-        return $this->request->post('v2/payment-requests', $body)->json();
+        $result =  $this->request->post('v2/payment-requests', $body)->json();
+        \Illuminate\Support\Facades\Log::info(json_encode($result));
+
+        return $result;
     }
 
     public function getPaymentStatus(string|int $code)

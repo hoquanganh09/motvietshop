@@ -27,7 +27,7 @@
                                     @for ($index = 0; $index < $item->kinds->count() && $index < 4; $index++)
                                         <li class="d-flex w-100 pt-1">
                                             <a class="nav-link animate-underline animate-target d-inline fw-normal text-truncate p-0"
-                                                href="shop-catalog-fashion.html">
+                                                href="{{ route('client.home.shop', ['category' => $item->id, 'kind' => $item->kinds[$index]->id]) }}">
                                                 {{ $item->kinds[$index]->name }}
                                             </a>
                                         </li>
@@ -35,7 +35,7 @@
                                     @if ($item->kinds->count() > 4)
                                         <li class="d-flex w-100 pt-1">
                                             <a class="nav-link animate-underline animate-target d-inline fw-normal text-truncate p-0"
-                                                href="shop-catalog-fashion.html">
+                                                href="{{ route('client.home.shop', ['category' => $item->id ]) }}">
                                                 + {{ ($item->kinds->count() - 4) }} thể loại nữa
                                             </a>
                                         </li>
@@ -43,7 +43,7 @@
                                 </ul>
                                 <div class="nav hover-effect-target opacity-0 pb-2 pb-xl-3 mt-auto">
                                     <a class="nav-link animate-underline text-body-emphasis text-nowrap p-0"
-                                        href="shop-catalog-fashion.html">
+                                        href="{{ route('client.home.shop', ['category' => $item->id ]) }}">
                                         <span class="animate-target">Xem ngay</span>
                                         <i class="ci-arrow-up-right fs-base ms-1"></i>
                                     </a>

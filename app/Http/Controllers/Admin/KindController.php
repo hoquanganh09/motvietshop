@@ -11,7 +11,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Kind\CreateKindRequest;
 use App\Http\Requests\Admin\Kind\UpdateKindRequest;
 use App\Models\Kind;
-use Illuminate\Http\Request;
 
 class KindController extends Controller
 {

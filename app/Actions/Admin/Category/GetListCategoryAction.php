@@ -18,9 +18,13 @@ class GetListCategoryAction
     /**
      * Execute the action.
      */
-    public function handle(bool $hasPaginate = true)
+    public function handle(bool $hasPaginate = true, array $relations = ['kinds'])
     {
         $query = Category::query();
+
+        foreach ($relations as $relation) {
+            $query = $query->with($relation);
+        }
 
         return $hasPaginate ? $query->paginate() : $query->get();
     }

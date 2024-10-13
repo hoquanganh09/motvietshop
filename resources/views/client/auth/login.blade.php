@@ -46,7 +46,7 @@
                             <label for="remember-30" class="form-check-label">Ghi nhớ đăng nhập</label>
                         </div>
                         <div class="nav">
-                            <a class="nav-link animate-underline p-0" href="account-password-recovery.html">
+                            <a class="nav-link animate-underline p-0" href="{{ route('client.auth.forgotPassword') }}">
                                 <span class="animate-target">Quên mật khẩu?</span>
                             </a>
                         </div>

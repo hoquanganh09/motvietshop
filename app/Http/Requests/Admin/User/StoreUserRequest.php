@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Requests\Admin\User;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'fullname' => 'required|string|max:250',
+            'date_of_birth' => 'nullable|date|before:today',
+            'email' => 'required|email:rfc,dns|max:250|unique:users,email',
+            'phone_number' => 'nullable|string|max:11|regex:/^\d{10,11}$/',
+            'role' => 'nullable|numeric',
+            'password' => 'required|string|max:250|min:6',
+        ];
+    }
+}

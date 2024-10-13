@@ -18,7 +18,7 @@ class GetListKindAction
     /**
      * Execute the action.
      */
-    public function handle(bool $hasPaginate = true, array $order = ['category_id', 'asc'] , array $relations = ['category'])
+    public function handle(bool $hasPaginate = true, array $order = ['category_id', 'asc'] , array $relations = ['category', 'products'])
     {
         $query = Kind::query()
             ->orderBy($order[0], $order[1]);

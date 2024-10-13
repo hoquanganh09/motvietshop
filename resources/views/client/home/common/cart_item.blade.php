@@ -37,8 +37,7 @@
                             class="btn-decrement btn btn-sm btn-icon" aria-label="Decrement quantity">
                             <i class="ci-minus"></i>
                         </button>
-                        <input type="number" class="form-control form-control-sm" value="{{ $item['quantity'] }}"
-                            readonly="">
+                        <input data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="number" class="input-quantity-cart form-control form-control-sm" value="{{ $item['quantity'] }}">
                         <button data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="button"
                             class="btn-increment btn btn-sm btn-icon" aria-label="Increment quantity">
                             <i class="ci-plus"></i>
@@ -58,7 +57,7 @@
                     class="btn-decrement btn btn-icon" aria-label="Decrement quantity">
                     <i class="ci-minus"></i>
                 </button>
-                <input type="number" class="form-control" value="{{ $item['quantity'] }}" readonly="">
+                <input data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="number" class="input-quantity-cart form-control" value="{{ $item['quantity'] }}">
                 <button data-url="{{ route('client.cart.updateQuantity', $item['key']) }}" type="button"
                     class="btn-increment btn btn-icon" aria-label="Increment quantity">
                     <i class="ci-plus"></i>
@@ -75,3 +74,14 @@
         </td>
     </tr>
 @endforeach
+@push('js')
+    <script>
+        $(() => {
+            $(document).on('input', '.input-quantity-cart', function() {
+                // const url = $(this).attr('data-url');
+
+                // updateQuantity(url, $(this));
+            });
+        });
+    </script>
+@endpush

@@ -30,7 +30,7 @@ RUN chmod 777 -R bootstrap/cache
 RUN rm -rf public/storage
 RUN php artisan storage:link
 RUN php artisan optimize
-#RUN crond && /usr/bin/supervisord -n -c /etc/supervisord.conf
+# RUN /usr/bin/supervisord -c /etc/supervisord.conf
 
 CMD ["php-fpm"]
 EXPOSE 9000

@@ -11,3 +11,19 @@
         z-index: 2;
     }
 }
+
+#kt_app_body table th:first-child, #kt_app_body table td:first-child {
+    padding-left: 15px;
+}
+
+.ajax-loading {
+    position: fixed;
+    top: 0;
+    z-index: 999999999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+}

@@ -20,7 +20,10 @@ class UpdateShippingAddressAction
      */
     public function handle(array $data, ShippingAddress $shippingAddress)
     {
-        $handle = $shippingAddress->update($data);
+        $handle = $shippingAddress->update([
+            ...$data,
+            'is_default' => $data['is_default'] ?? 0,
+        ]);
 
         if (isset($data['is_default'])) {
             ShippingAddress::where('user_id', $shippingAddress->user_id)

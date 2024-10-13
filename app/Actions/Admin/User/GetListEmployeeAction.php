@@ -33,7 +33,7 @@ class GetListEmployeeAction
             ->when($active != '', function ($query) use ($active) {
                 $query->where('is_active', $active);
             })
-            ->whereNot('role', Role::USER)
+            ->where('role', '!=', Role::USER)
             ->where('is_admin', false);
 
         return $hasPaginate ? $query->paginate() : $query->get();

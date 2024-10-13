@@ -2,7 +2,7 @@
     <nav class="container pt-2 pt-xxl-3 my-3 my-md-4" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('client.home.index') }}">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a href="shop-catalog-fashion.html">Cửa hàng</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('client.home.shop') }}">Cửa hàng</a></li>
             <li class="breadcrumb-item active" aria-current="page">Giỏ hàng</li>
         </ol>
     </nav>

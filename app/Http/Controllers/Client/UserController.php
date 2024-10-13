@@ -44,4 +44,28 @@ class UserController extends Controller
 
         return redirect()->back()->with('success', 'Đổi thông tin cá nhân thành công');
     }
+
+    public function changeNoti(Request $request)
+    {
+        $attrs = [
+            'order' => 'has_send_email_order',
+            'shipping' => 'has_send_email_shipping',
+        ];
+
+        $user = auth()->user();
+
+        if ($request->has($attrs['order'])) {
+            $user->{$attrs['order']} = $request->input($attrs['order']);
+        }
+
+        if ($request->has($attrs['shipping'])) {
+            $user->{$attrs['shipping']} = $request->input($attrs['shipping']);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Cập nhật cài đặt thành công !',
+        ]);
+    }
 }

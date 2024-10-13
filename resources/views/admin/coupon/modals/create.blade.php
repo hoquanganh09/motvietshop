@@ -85,11 +85,11 @@
             });
 
             function clear() {
-                validateCode.find('input').val();
-                validateDiscount.find('input').val();
-                validateMaxPrice.find('input').val();
-                validateAmount.find('input').val();
-                validateExpirationDate.find('input').val();
+                validateCode.find('input').val('');
+                validateDiscount.find('input').val('');
+                validateMaxPrice.find('input').val('');
+                validateAmount.find('input').val('');
+                validateExpirationDate.find('input').val('');
 
                 clearError();
             }

@@ -6,9 +6,13 @@ use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Category;
+use App\Models\Color;
+use App\Models\Kind;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\ShippingAddress;
+use App\Models\Size;
 use App\Models\Wishlist;
 use App\Services\PayOS;
 use Illuminate\Http\Request;
@@ -22,8 +26,9 @@ class ClientController extends Controller
     {
         $limit = 8;
         $page = $request->input('page', 1);
+        $category = $request->input('category');
 
-        $products = Product::query()
+        $query = Product::query()
             ->active()
             ->with([
                 'colors',
@@ -32,6 +37,13 @@ class ClientController extends Controller
                 'sizes.size',
                 'images',
             ])
+            ->when($category, function ($query) use ($category) {
+                $query->whereHas('kind.category', function ($query) use ($category) {
+                    $query->where('id', $category);
+                });
+            });
+
+        $products = $query
             ->limit($limit)
             ->offset(($page - 1) * $limit)
             ->get();
@@ -46,18 +58,35 @@ class ClientController extends Controller
 
         $categories = Category::query()->with('kinds')->get();
         $banners = Banner::query()->get();
+        $reviews = Review::query()
+            ->with([
+                'user',
+                'product',
+                'product.images',
+            ])
+            ->orderBy('id', 'desc')->limit(6)
+            ->get();
 
         return view('client.home.index', [
             'categories' => $categories,
             'banners' => $banners,
             'products' => $products,
-            'canViewMore' => $products->count() > $limit,
+            'canViewMore' => $query->count() > $limit,
+            'category' => $category,
+            'reviews' => $reviews,
         ]);
     }
 
     public function productDetail(Product $product)
     {
+        $maximumRelatedProduct = 10;
         $product->load(Product::getProductRelations());
+        $reviews = Review::query()
+            ->with([
+                'user',
+            ])
+            ->where('product_id', $product->id)
+            ->paginate();
 
         $arrProductViewed = Session::get('productViewed', []);
 
@@ -66,26 +95,19 @@ class ClientController extends Controller
             Session::put('productViewed', $arrProductViewed);
         }
 
-        $productVieweds = Product::getProducts(
-            ids: $arrProductViewed,
-            exceptId: $product->id,
-            limit: 16
-        );
+        $productVieweds = Product::query()
+            ->where(function ($query) use ($product) {
+                $query->orWhereHas('kind', function ($query) use ($product) {
+                    $query->where('id', $product->kind_id);
+                });
+            })
+            ->where('id', '!=', $product->id)
+            ->active()
+            ->with(Product::getProductRelations())
+            ->limit($maximumRelatedProduct)
+            ->get();
 
-        if ($productVieweds->count() < 16) {
-            $need = 16 - $productVieweds->count();
-
-            $append = Product::getProducts(
-                ids: $arrProductViewed,
-                exceptId: $product->id,
-                limit: $need,
-                buider: true
-            )->where('kind_id', $product->kind_id)->get();
-
-            $productVieweds->merge($append);
-        }
-        // dd($productVieweds->toArray());
-        return view('client.product.detail', compact('product', 'productVieweds'));
+        return view('client.product.detail', compact('product', 'productVieweds', 'reviews'));
     }
 
     public function wishlist()
@@ -255,8 +277,69 @@ class ClientController extends Controller
         ]);
     }
 
-    public function shop()
+    public function shop(Request $request)
     {
-        return view('client.home.shop');
+        $keyword = $request->input('keyword');
+        $sort = $request->input('sort', 'name:asc');
+        $isSale = $request->boolean('is_sale', false);
+
+        $kinds = Kind::query()
+            ->with([
+                'products'
+            ])
+            ->get();
+
+        $sizes = Size::query()
+            ->get();
+
+        $colors = Color::query()
+            ->get();
+
+        $filters = [
+            "min_price" => $request->input('min_price', 0),
+            "max_price" => $request->input('max_price', 500000),
+            'kind' => $request->input('kinds', $kinds->pluck('id')->toArray()),
+            'size' => $request->input('sizes', $sizes->pluck('id')->toArray()),
+            'color' => $request->input('colors', $colors->pluck('id')->toArray()),
+        ];
+
+        if (request()->ajax()) {
+            $filters = [
+                ...$filters,
+                'kind' => $request->input('kinds', []),
+                'size' => $request->input('sizes', []),
+                'color' => $request->input('colors', []),
+            ];
+        }
+
+        $products = Product::search($keyword)
+            ->active()
+            ->with([
+                'images',
+                'sizes',
+                'sizes.size',
+                'colors',
+                'colors.color',
+            ])
+            ->whereIn('kind_id', $filters['kind'])
+            ->where(function ($query) use ($filters) {
+                $query->where('price', '>=', $filters['min_price'])
+                    ->where('price', '<=', $filters['max_price']);
+            })
+            ->join('product_sizes as ps', 'products.id', '=', 'ps.product_id')
+            ->whereIn('ps.size_id', $filters['size'])
+            ->join('product_colors as pc', 'products.id', '=', 'pc.product_id')
+            ->whereIn('pc.color_id', $filters['color'])
+            ->when($isSale, fn($query) => $query->whereNotNull('old_price'))
+            ->groupBy('products.id')
+            ->select('products.*')
+            ->orderBy('products.' . explode(':', $sort)[0], explode(':', $sort)[1])
+            ->paginate();
+
+        if (request()->ajax()) {
+            return response()->view('client.home.common.shop_product_grid', compact('products', 'sort'));
+        }
+
+        return view('client.home.shop', compact('products', 'kinds', 'sizes', 'colors', 'sort'));
     }
 }

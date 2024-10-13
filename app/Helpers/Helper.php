@@ -1,10 +1,11 @@
 <?php
 
 use App\Enums\CartStatus;
+use Carbon\Carbon;
 
 function getLogo(): string
 {
-    return asset('images/falcon.png');
+    return asset('images/logo.png');
 }
 
 function getUserAvatar(): string
@@ -92,7 +93,8 @@ function stripVN($str)
     return $str;
 }
 
-function getDiscount() {
+function getDiscount()
+{
     return session()->get('discount', null);
 }
 
@@ -118,6 +120,86 @@ function getCartDiscountTotal(CartStatus $status = CartStatus::All, string $key 
 {
     $cartDiscount = getCartDiscount($status, $key);
     $cartTotal = getCartTotal($status, $key);
-    
+
     return $cartTotal - $cartDiscount;
+}
+
+function getNoProductImage()
+{
+    return asset('images/no-products.jpg');
+}
+
+function getDiffPercent($a, $b)
+{
+    $percent = $b != 0 ? ((($a - $b) / $b) * 100) : 0;
+
+    return [
+        'percent' => round($percent, 2) < 0 ? -1 * round($percent, 2) : round($percent, 2),
+        'icon' => $percent >= 0 ? 'ki-arrow-up' : 'ki-arrow-down',
+        'color' => $percent >= 0 ? 'success' : 'danger'
+    ];
+}
+
+function getStartEndThreeMonthByThreeMonth(int $threeMonth): array
+{
+    if ($threeMonth == 1) {
+        return [
+            'start' => 1,
+            'end' => 3,
+        ];
+    }
+
+    if ($threeMonth == 2) {
+        return [
+            'start' => 4,
+            'end' => 6,
+        ];
+    }
+
+    if ($threeMonth == 3) {
+        return [
+            'start' => 7,
+            'end' => 9,
+        ];
+    }
+
+    return [
+        'start' => 10,
+        'end' => 12,
+    ];
+}
+
+function getThreeMonthByMonth(int $month)
+{
+    if ($month <= 3) {
+        return 1;
+    }
+
+    if ($month <= 6) {
+        return 2;
+    }
+
+    if ($month <= 9) {
+        return 3;
+    }
+
+    return 4;
+}
+
+function getWeeksInMonth($year, $month)
+{
+    // Tạo ngày đầu tiên của tháng
+    $startOfMonth = Carbon::create($year, $month, 1);
+    // Tạo ngày cuối cùng của tháng
+    $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+    // Tính số tuần
+    $weeks = $startOfMonth->diffInWeeks($endOfMonth) + 1; // +1 để đếm trọn vẹn tuần bắt đầu và kết thúc
+
+    return $weeks;
+}
+
+function getBackgroundImage()
+{
+    return asset('images/user-background.webp');
 }

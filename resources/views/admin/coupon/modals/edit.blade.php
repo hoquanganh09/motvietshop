@@ -47,7 +47,7 @@
                         <label class="form-label required">
                             Ngày hết hạn
                         </label>
-                        <input value="{{ $coupon->expiration_date }}" type="date" class="form-control mb-2" name="expiration_date">
+                        <input value="{{ $coupon->expiration_date->format('Y-m-d') }}" type="date" class="form-control mb-2" name="expiration_date">
                         <div class="text-danger feedback"></div>
                     </div>
                 </form>
@@ -69,7 +69,7 @@
         const validateAmount = form.find('.validate-amount');
         const validateExpirationDate = form.find('.validate-expiration_date');
 
-        modal.modal('show');
+        modal.modal('show');  
 
         modal.on('hidden.bs.modal', function() {
             clear();
@@ -89,11 +89,11 @@
         });
 
         function clear() {
-            validateCode.find('input').val();
-            validateDiscount.find('input').val();
-            validateMaxPrice.find('input').val();
-            validateAmount.find('input').val();
-            validateExpirationDate.find('input').val();
+            validateCode.find('input').val('');
+            validateDiscount.find('input').val('');
+            validateMaxPrice.find('input').val('');
+            validateAmount.find('input').val('');
+            validateExpirationDate.find('input').val('');
 
             clearError();
         }

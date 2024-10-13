@@ -41,4 +41,27 @@
         </div>
     </div>
     @include('client.modal.add_shipping_address')
+    @push('js')
+        <script>
+            $('#notifications input[type=checkbox]').on('change', function() {
+                ajax(`{{ route('client.auth.changeNoti') }}`, 'post', {
+                    [$(this).attr('name')]: $(this).is(':checked') ? 1 : 0
+                }, function (res) {
+                    toast(res.data.message);
+                });
+            });
+
+            $('#notifications-master').on('change', function() {
+                let data = {};
+
+                $('#notifications input[type=checkbox]').each(function() {
+                    data[$(this).attr('name')] = $(this).is(':checked') ? 1 : 0
+                });
+                
+                ajax(`{{ route('client.auth.changeNoti') }}`, 'post', data, function (res) {
+                    toast(res.data.message);
+                });
+            });
+        </script>
+    @endpush
 </x-client.layout.home>

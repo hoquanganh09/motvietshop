@@ -20,17 +20,33 @@
 
             $(document).on('click', '.btn-cancel-order', function(e) {
                 e.preventDefault();
-                
+
                 const url = $(this).attr('href');
 
                 showConfirm('Bạn có chắc muốn hủy đơn hàng không?', function() {
                     ajax(url, 'put', {}, function(res) {
                         toast(res.data.message);
-                        myOffcanvas.querySelector('.offcanvas-header').innerHTML = res.data.header;
-                        myOffcanvas.querySelector('.offcanvas-footer').innerHTML = res.data.footer;
+                        myOffcanvas.querySelector('.offcanvas-header').innerHTML = res.data
+                            .header;
+                        myOffcanvas.querySelector('.offcanvas-footer').innerHTML = res.data
+                            .footer;
 
                         loadView(location.href, $('#load-order'));
                     });
+                });
+            });
+
+            $(document).on('click', '.btn-shipped-order', function(e) {
+                e.preventDefault();
+
+                const url = $(this).attr('href');
+
+                ajax(url, 'put', {}, function(res) {
+                    toast(res.data.message);
+                    myOffcanvas.querySelector('.offcanvas-header').innerHTML = res.data.header;
+                    myOffcanvas.querySelector('.offcanvas-footer').innerHTML = res.data.footer;
+
+                    loadView(location.href, $('#load-order'));
                 });
             });
         });

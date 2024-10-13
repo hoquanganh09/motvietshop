@@ -34,6 +34,12 @@
         {{ $slot }}
     </main>
 
+    <div id="ajax-loading" class="ajax-loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+    </div>
+
     <!-- Page footer -->
     @include('client.layouts.footer')
 </x-client.layout.default>

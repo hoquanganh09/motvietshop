@@ -21,8 +21,7 @@
                                     @endif
                                 </div>
                                 <div class="d-flex">
-                                    <a class="text-center nav-link hiding-collapse-toggle text-decoration-underline p-0 collapsed"
-                                        href=".primary-address" data-bs-toggle="collapse" aria-expanded="false"
+                                    <a href="javascript:void(0)" class="btn-edit-address text-center nav-link hiding-collapse-toggle text-decoration-underline p-0 collapsed" data-bs-toggle="collapse" aria-expanded="false"
                                         aria-controls="preview_{{ $item->id }} edit_{{ $item->id }}">
                                         Chỉnh sửa
                                     </a>
@@ -36,14 +35,14 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="primary-address collapse show" id="preview_{{ $item->id }}" style="">
+                            <div class="primary-address-{{ $item->id }} collapse show" id="preview_{{ $item->id }}" style="">
                                 <ul class="list-unstyled fs-sm m-0">
                                     <li>{{ $item->fullname }}</li>
                                     <li>{{ $item->phone_number }}</li>
                                     <li>{{ $item->address }}</li>
                                 </ul>
                             </div>
-                            <div class="primary-address collapse" id="edit_{{ $item->id }}" style="">
+                            <div class="primary-address-{{ $item->id }} collapse" id="edit_{{ $item->id }}" style="">
                                 <form class="row g-3 g-sm-4" method="post"
                                     action="{{ route('client.shippingAddress.update', $item->id) }}">
                                     @csrf
@@ -119,7 +118,7 @@
                                         <div class="d-flex gap-3 pt-2 pt-sm-0">
                                             <button type="submit" class="btn btn-primary">Lưu</button>
                                             <button type="button" class="btn btn-secondary collapsed"
-                                                data-bs-toggle="collapse" data-bs-target=".primary-address"
+                                                data-bs-toggle="collapse" data-bs-target=".primary-address-{{ $item->id }}"
                                                 aria-expanded="false"
                                                 aria-controls="preview_{{ $item->id }} edit_{{ $item->id }}">Đóng</button>
                                         </div>
@@ -141,4 +140,16 @@
         </div>
     </div>
     @include('client.modal.add_shipping_address')
+    @push('js')
+        <script>
+            $(() => {
+                $(document).on('click', '.btn-edit-address', function () {
+                    const ids = $(this).attr('aria-controls').split(' ');
+                    
+                    $(`#${ids[0]}`).collapse('toggle');
+                    $(`#${ids[1]}`).collapse('toggle');
+                });
+            });
+        </script>
+    @endpush
 </x-client.layout.home>
