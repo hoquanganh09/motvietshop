@@ -30,6 +30,7 @@ class Order extends Model
         'code',
         'discount',
         'discount_code',
+        'payos_order_code',
     ];
 
     public function getStatusLabel()

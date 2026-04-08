@@ -21,6 +21,11 @@ class DeleteOrderAction
             }
 
             $order->orderDetails()->delete();
+
+            if ($order->discount_code) {
+                \App\Models\Coupon::where('code', $order->discount_code)->increment('amount');
+            }
+
             $order->delete();
 
             DB::commit();

@@ -89,6 +89,7 @@ class ClientController extends Controller
 
         if (!in_array($product->id, $arrProductViewed)) {
             $arrProductViewed[] = $product->id;
+            $arrProductViewed = array_slice(array_unique($arrProductViewed), 0, 20);
             Session::put('productViewed', $arrProductViewed);
         }
 
@@ -188,7 +189,8 @@ class ClientController extends Controller
     {
         $order = Order::query()
             ->where('user_id', Auth::id())
-            ->find(request()->input('orderCode'));
+            ->where('payos_order_code', request()->input('orderCode'))
+            ->first();
 
         if (!$order) {
             return abort(404);

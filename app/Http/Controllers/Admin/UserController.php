@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\User\StoreUserRequest;
 use App\Http\Requests\Admin\User\UpdatePasswordRequest;
 use App\Http\Requests\Admin\User\UpdateUserRequest;
-use App\Jobs\SendMailForgotPasswordJon;
+use App\Jobs\SendMailForgotPasswordJob;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -103,7 +103,7 @@ class UserController extends Controller
             abort(403, 'Không có quyền reset mật khẩu tài khoản Root Admin.');
         }
 
-        SendMailForgotPasswordJon::dispatch($request->email);
+        SendMailForgotPasswordJob::dispatch($request->email);
 
         return back()->with('success', 'Gửi mail reset mật khẩu thành công');
     }

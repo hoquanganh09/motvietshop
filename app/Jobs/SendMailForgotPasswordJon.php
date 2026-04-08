@@ -10,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Password;
 
-class SendMailForgotPasswordJon implements ShouldQueue
+class SendMailForgotPasswordJob implements ShouldQueue
 {
     use Queueable;
 

@@ -92,12 +92,11 @@ class DashboardService
                 ];
                 break;
             case ThongKeType::THREE_MONTHS->value:
-                $result = [
-                    'Quý 1',
-                    'Quý 2',
-                    'Quý 3',
-                    'Quý 4',
-                ];
+                $currentQuarter = (int) ceil(now()->month / 3);
+                $result = [];
+                for ($i = 1; $i <= 4; $i++) {
+                    $result[] = 'Quý ' . $i . ($i === $currentQuarter ? ' (hiện tại)' : '');
+                }
                 break;
             case ThongKeType::YEAR->value:
                 $result = array_map(fn($item) => 'Tháng ' . $item, range(1, 12));

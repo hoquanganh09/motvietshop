@@ -40,6 +40,9 @@ class PayOS
             "signature" => hash_hmac('sha256', $sig, config('payos.checksum_key')),
         ];
 
+        $order->payos_order_code = $orderCode;
+        $order->save();
+
         $result =  $this->request->post('v2/payment-requests', $body)->json();
         \Illuminate\Support\Facades\Log::info(json_encode($result));
 

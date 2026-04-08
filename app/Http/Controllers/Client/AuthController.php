@@ -10,7 +10,7 @@ use App\Http\Requests\Client\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Client\Auth\LoginRequest;
 use App\Http\Requests\Client\Auth\RegisterRequest;
 use App\Jobs\Client\SendMailVerifyEmailJob;
-use App\Jobs\SendMailForgotPasswordJon;
+use App\Jobs\SendMailForgotPasswordJob;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,7 +98,7 @@ class AuthController extends Controller
 
     public function handleForgotPassword(ForgotPasswordRequest $request)
     {
-        SendMailForgotPasswordJon::dispatch($request->email);
+        SendMailForgotPasswordJob::dispatch($request->email);
 
         return redirect()->back()->with('success', 'Vui lòng kiểm tra email để đặt lại mật khẩu');
     }

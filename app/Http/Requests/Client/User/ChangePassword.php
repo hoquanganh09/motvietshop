@@ -5,6 +5,7 @@ namespace App\Http\Requests\Client\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class ChangePassword extends FormRequest
 {
@@ -24,7 +25,7 @@ class ChangePassword extends FormRequest
     public function rules(): array
     {
         return [
-            'current_password' => 'nullable|string|max:250|current_password:web',
+            'current_password' => [Rule::requiredIf(fn() => auth()->user()?->password !== null), 'nullable', 'string', 'max:250', 'current_password:web'],
             'new_password' => 'required|string|max:250|min:6',
         ];
     }

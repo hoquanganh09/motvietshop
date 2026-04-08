@@ -17,7 +17,7 @@ class Visitor
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!str_contains($request->url(), 'admin')) {
+        if (!$request->is('admin') && !$request->is('admin/*')) {
             // Fix #7: Dedup Visitor theo IP + Ngày
             // Trước đây mỗi request đều tạo mới 1 bản ghi, 1 người F5 10 lần = 10 visitor
             // Giờ mỗi IP chỉ được đếm 1 lần/ngày, dùng Cache để tránh DB hit liên tục

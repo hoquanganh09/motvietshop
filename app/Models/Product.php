@@ -30,6 +30,11 @@ class Product extends Model
 
     public function getThumbnail(bool $withDefault = true)
     {
+        // Guard against N+1: caller must eager-load 'images'
+        if (!$this->relationLoaded('images')) {
+            return $withDefault ? getDefaultImage() : null;
+        }
+
         $image = $this->images->first();
 
         if (!$image) {

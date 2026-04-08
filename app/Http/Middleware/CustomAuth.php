@@ -21,6 +21,10 @@ class CustomAuth
             'admin' => 'admin.auth.login',
         ];
 
+        if (!isset($redirectGuard[$guard])) {
+            abort(500, 'Unknown auth guard: ' . $guard);
+        }
+
         if (Auth::guard($guard)->check()) {
             return $next($request);
         }

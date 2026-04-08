@@ -32,9 +32,7 @@ class PayOSWebhookController extends Controller
             return response()->json(['error' => 'Missing orderCode'], 422);
         }
 
-        // orderCode = order->id + time(), so we cannot do a direct lookup.
-        // Best-effort: find the most recent unpaid order whose id is a prefix of orderCode.
-        $order = Order::where('id', $orderCode)->first();
+        $order = Order::where('payos_order_code', $orderCode)->first();
 
         if ($order && ($payload['status'] ?? null) === 'PAID') {
             $order->is_paid = true;
