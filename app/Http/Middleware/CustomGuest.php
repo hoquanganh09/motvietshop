@@ -25,6 +25,8 @@ class CustomGuest
             return $next($request);
         }
 
+        if (!isset($redirectGuard[$guard])) abort(500, "Unknown auth guard: " . $guard);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Unauthorized.',

@@ -124,6 +124,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isRoot()
     {
-        return $this->role == Role::ROOT || $this->is_admin == 1;
+        return $this->role == Role::ROOT;
     }
 }

@@ -46,6 +46,7 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
+        request()->session()->regenerate();
 
         return to_route('client.home.index');
     }
@@ -60,6 +61,7 @@ class AuthController extends Controller
         try {
             $user = app()->make(LoginSocialAction::class)->handle();
             Auth::login($user, true);
+            request()->session()->regenerate();
             return to_route('client.home.index');
         } catch (\Exception $e) {
             // Fix #5: Nếu user nhấn Cancel ở màn hình Google thì Socialite throw exception

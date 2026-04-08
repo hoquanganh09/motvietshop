@@ -27,7 +27,7 @@ class StoreUserRequest extends FormRequest
             'email' => 'required|email:rfc,dns|max:250|unique:users,email',
             'phone_number' => 'nullable|string|max:11|regex:/^\d{10,11}$/',
             'role' => 'nullable|numeric',
-            'password' => 'required|string|max:250|min:6',
+            'password' => 'required|string|max:250|min:8',
         ];
     }
 }
