@@ -6,7 +6,7 @@ services:
     image: motviet
     restart: always
     volumes:
-      - app_data:/app
+      - ./:/app
   nginx:
     image: nginx
     restart: always
@@ -14,7 +14,7 @@ services:
       - 9999:80
     command: ["nginx", "-g", "daemon off;"]
     volumes:
-      - app_data:/app
+      - ./:/app
       - ./nginx_default.conf:/etc/nginx/nginx.conf
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
@@ -35,10 +35,8 @@ services:
     image: phpmyadmin
     restart: always
     ports:
-      - 9000:80
+      - 9090:80
     environment:
       - PMA_PORT=3306
       - PMA_ARBITRARY=1
       - PMA_HOST=mysql
-volumes:
- app_data:

@@ -15,8 +15,8 @@ class CartController extends Controller
     {
         $carts = Session::get('cart', []);
         $key = $product->id . '-' . $request->input('color') . '-' . $request->input('size');
-        $color = Color::find($request->input('color'));
-        $size = Size::find($request->input('size'));
+        $color = Color::findOrFail($request->input('color'));
+        $size = Size::findOrFail($request->input('size'));
 
         $carts[$key] = [
             'id' => $product->id,

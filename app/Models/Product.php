@@ -31,11 +31,15 @@ class Product extends Model
     {
         $image = $this->images->first();
 
+        if (!$image) {
+            return $withDefault ? getDefaultImage() : null;
+        }
+
         if (!$withDefault) {
             return $image->isOnTop() ? $image->image : null;
         }
 
-        return $image ? $image->getImage() : getDefaultImage();
+        return $image->getImage();
     }
 
     public function getStatusLabel(): string

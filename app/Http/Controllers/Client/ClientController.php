@@ -43,10 +43,7 @@ class ClientController extends Controller
                 });
             });
 
-        $products = $query
-            ->limit($limit)
-            ->offset(($page - 1) * $limit)
-            ->get();
+        $products = $query->paginate($limit, ['*'], 'page', $page);
 
         if ($request->ajax()) {
             $html = "";
@@ -71,7 +68,7 @@ class ClientController extends Controller
             'categories' => $categories,
             'banners' => $banners,
             'products' => $products,
-            'canViewMore' => $query->count() > $limit,
+            'canViewMore' => $products->hasMorePages(),
             'category' => $category,
             'reviews' => $reviews,
         ]);

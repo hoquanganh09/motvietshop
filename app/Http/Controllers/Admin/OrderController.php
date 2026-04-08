@@ -6,11 +6,10 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Exports\OrderExport;
 use App\Http\Controllers\Controller;
-use App\Jobs\SendMailOrderConfirmedJob;
-use App\Jobs\SendMailOrderShippingJob;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Actions\Admin\Order\UpdateOrderStatusAction;
+use App\Actions\Admin\Order\DeleteOrderAction;
 
 class OrderController extends Controller
 {
@@ -67,43 +66,24 @@ class OrderController extends Controller
         return view('admin.order.view', compact('order'));
     }
 
-    public function update(Request $request, Order $order)
+    public function update(Request $request, Order $order, UpdateOrderStatusAction $updateAction)
     {
-        $order->status = $request->input('status');
+        $success = $updateAction->handle($order, $request->input('status'));
 
-        if ($order->isShipped()) {
-            $order->is_paid = 1;
-        }
-        $order->save();
-
-        if ($order->canShipping()) {
-            SendMailOrderConfirmedJob::dispatch($order->user_id, $order);
-        }
-
-        if ($order->canShipped()) {
-            SendMailOrderShippingJob::dispatch($order->user_id, $order);
-        }
-
-        return redirect()->back()->with('success', 'Cập nhật trạng thái đơn hàng thành công');
+        return redirect()->back()->with($success ? 'success' : 'error', $success ? 'Cập nhật trạng thái đơn hàng thành công' : 'Cập nhật thất bại');
     }
 
-    public function destroy(Order $order)
+    public function destroy(Order $order, DeleteOrderAction $deleteAction)
     {
-        DB::beginTransaction();
+        $success = $deleteAction->handle($order);
 
-        try {
-            $order->orderDetails()->delete();
-            $order->delete();
-
-            DB::commit();
-
+        if ($success) {
             return response()->json([
                 'message' => 'Đã xóa đơn hàng thành công',
             ]);
-        } catch (\Exception $exception) {
-            log($exception->getMessage());
-            DB::rollBack();
         }
+        
+        return response()->json(['message' => 'Xóa thất bại'], 400);
     }
 
     public function export(Order $order)

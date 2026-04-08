@@ -25,8 +25,8 @@ RUN cp .env.example .env
 RUN composer install
 RUN php artisan key:generate
 RUN composer install
-RUN chmod -R 777 storage
-RUN chmod 777 -R bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 RUN rm -rf public/storage
 RUN php artisan storage:link
 RUN php artisan optimize
