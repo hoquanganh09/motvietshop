@@ -11,8 +11,7 @@
         "laravel/scout": "^10.11",
         "laravel/socialite": "^5.15",
         "laravel/tinker": "^2.9",
-        "sontx/laravel-dod": "^1.0",
-        "spatie/laravel-pdf": "^1.5"
+        "sontx/laravel-dod": "^1.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",
@@ -20,8 +19,7 @@
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.0",
-        "phpunit/phpunit": "^11.0.1"
+        "nunomaduro/collision": "^8.0"
     },
     "autoload": {
         "psr-4": {
