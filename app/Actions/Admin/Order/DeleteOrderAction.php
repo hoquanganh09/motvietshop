@@ -15,8 +15,10 @@ class DeleteOrderAction
 
         try {
             // C11: Restore product stock before deleting order details
+            // Only restore stock if order was not already cancelled (cancel path already restores stock)
             $order->load('orderDetails');
-            foreach ($order->orderDetails as $detail) {
+            $alreadyCancelled = $order->status === \App\Enums\OrderStatus::CANCEL->value;
+            if (!$alreadyCancelled) foreach ($order->orderDetails as $detail) {
                 Product::where('id', $detail->product_id)->increment('stock', $detail->quantity);
             }
 

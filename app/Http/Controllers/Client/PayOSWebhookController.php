@@ -10,31 +10,39 @@ class PayOSWebhookController extends Controller
 {
     /**
      * Handle incoming PayOS webhook.
-     * Verifies HMAC-SHA256 signature then updates order payment status.
+     * PayOS signs the webhook body using the same canonical key=value format as outgoing requests.
+     * Ref: PayOS documentation — signature covers the `data` object fields sorted alphabetically.
      */
     public function handle(Request $request)
     {
-        $signature = $request->header('x-payos-signature');
-        $expectedSignature = hash_hmac(
-            'sha256',
-            $request->getContent(),
-            config('payos.checksum_key')
-        );
+        $payload = $request->json()->all();
+        $data = $payload['data'] ?? $payload;
 
-        if (!hash_equals($expectedSignature, (string) $signature)) {
+        // Build canonical signature string: sorted key=value pairs (same format PayOS uses)
+        $sigFields = ['amount', 'cancelUrl', 'description', 'orderCode', 'returnUrl', 'status'];
+        $parts = [];
+        foreach ($sigFields as $key) {
+            if (isset($data[$key])) {
+                $parts[] = $key . '=' . $data[$key];
+            }
+        }
+        $sigString = implode('&', $parts);
+
+        $expectedSignature = hash_hmac('sha256', $sigString, config('payos.checksum_key'));
+        $receivedSignature = $payload['signature'] ?? $request->header('x-payos-signature', '');
+
+        if (!hash_equals($expectedSignature, (string) $receivedSignature)) {
             return response()->json(['error' => 'Invalid signature'], 401);
         }
 
-        $payload = $request->json()->all();
-        $orderCode = $payload['orderCode'] ?? null;
-
+        $orderCode = $data['orderCode'] ?? null;
         if (!$orderCode) {
             return response()->json(['error' => 'Missing orderCode'], 422);
         }
 
         $order = Order::where('payos_order_code', $orderCode)->first();
 
-        if ($order && ($payload['status'] ?? null) === 'PAID') {
+        if ($order && ($data['status'] ?? null) === 'PAID') {
             $order->is_paid = true;
             $order->save();
         }
