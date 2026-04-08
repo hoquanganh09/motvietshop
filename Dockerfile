@@ -28,7 +28,7 @@ RUN composer install
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 RUN rm -rf public/storage
-RUN php artisan storage:link
+RUN php artisan storage:link --relative
 RUN php artisan optimize
 # RUN /usr/bin/supervisord -c /etc/supervisord.conf
 

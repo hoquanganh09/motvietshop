@@ -19,24 +19,27 @@ class CouponController extends Controller
 
         if (!$coupon) {
             return response()->json([
-                'message' => 'Mã giảm giá không tồn tại.',
+                'message' => 'Mã giảm giá không tồn tại.',
                 'order_summary' => view('client.home.common.order_summary')->render(),
             ], 404);
         }
         
         if ($coupon->isExpired()) {
             return response()->json([
-                'message' => 'Mã đã hết hạn.',
+                'message' => 'Mã đã hết hạn.',
                 'order_summary' => view('client.home.common.order_summary')->render(),
             ], 400);
         }
 
         if ($coupon->amount <= 0) {
             return response()->json([
-                'message' => 'Mã đã hết lượt sử dụng.',
+                'message' => 'Mã đã hết lượt sử dụng.',
                 'order_summary' => view('client.home.common.order_summary')->render(),
             ], 400);
         }
+
+        // Fix #4: max_price = giới hạn số tiền giảm TỐI ĐA (cap), không phải điều kiện đơn tối thiểu
+        // Helper.php sẽ áp dụng cap này khi tính toán giỏ hàng
 
         session()->put('discount', $coupon->toArray());
 

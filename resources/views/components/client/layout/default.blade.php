@@ -33,6 +33,42 @@
         window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
         window.axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
         window.axios.defaults.headers.common['Content-Type'] = 'multipart/form-data';
+        
+        // Auto NProgress for all API Calls
+        axios.interceptors.request.use(config => {
+            if (typeof NProgress !== 'undefined') NProgress.start();
+            return config;
+        });
+        axios.interceptors.response.use(response => {
+            if (typeof NProgress !== 'undefined') NProgress.done();
+            return response;
+        }, error => {
+            if (typeof NProgress !== 'undefined') NProgress.done();
+            return Promise.reject(error);
+        });
+        
+        $(() => {
+            const toggleThemeBtn = $('#themeToggleBtn');
+            const icon = toggleThemeBtn.find('i');
+            
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                icon.removeClass('ci-moon').addClass('ci-sun');
+            }
+
+            toggleThemeBtn.on('click', function () {
+                const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                const newTheme = isDark ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                if (newTheme === 'dark') {
+                    icon.removeClass('ci-moon').addClass('ci-sun');
+                } else {
+                    icon.removeClass('ci-sun').addClass('ci-moon');
+                }
+            });
+        });
     </script>
 @endpush
 

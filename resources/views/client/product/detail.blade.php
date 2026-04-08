@@ -33,7 +33,7 @@
                             class="ci-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
                         <div class="ratio hover-effect-target bg-body-tertiary rounded"
                             style="--cz-aspect-ratio: calc(706 / 636 * 100%)">
-                            <img loading="lazy" src="{{ $product->getThumbnail() }}" alt="Image">
+                            <img id="productMainThumbnail" loading="lazy" src="{{ $product->getThumbnail() }}" alt="Image">
                         </div>
                     </a>
                 </div>
@@ -194,12 +194,12 @@
     </section>
 
     <!-- Sticky product preview + Add to cart CTA -->
-    <section class="sticky-product-banner sticky-top" data-sticky-element="">
-        <div class="sticky-product-banner-inner pt-5">
-            <div class="navbar container flex-nowrap align-items-center bg-body pt-4 pt-lg-5 mt-lg-n2">
+    <section id="customStickyBottomBar" class="fixed-bottom border-top shadow-lg" style="z-index: 1020; background: var(--cz-body-bg); transform: translateY(150%); transition: transform 0.3s ease-in-out;">
+        <div class="py-3">
+            <div class="navbar container flex-nowrap align-items-center">
                 <div class="d-flex align-items-center min-w-0 ms-lg-2 me-3">
                     <div class="ratio ratio-1x1 flex-shrink-0" style="width: 50px">
-                        <img loading="lazy" src="{{ $product->getThumbnail() }}" alt="Image">
+                        <img id="stickyCartThumbnail" loading="lazy" src="{{ $product->getThumbnail() }}" alt="Image">
                     </div>
                     <h4 class="h6 fw-medium d-none d-lg-block ps-3 mb-0">{{ $product->name }}</h4>
                     <div class="w-100 min-w-0 d-lg-none ps-2">
@@ -225,10 +225,10 @@
                         aria-label="Add to Wishlist">
                         <i class="ci-heart fs-base animate-target"></i>
                     </button>
-                    <button type="button" class="btn btn-dark ms-auto d-none d-md-inline-flex px-4">
+                    <button type="button" class="btn-trigger-add-to-cart btn btn-dark ms-auto d-none d-md-inline-flex px-4">
                         Thêm vào giỏ hàng
                     </button>
-                    <button type="button" class="btn btn-icon btn-dark animate-slide-end ms-auto d-md-none"
+                    <button type="button" class="btn-trigger-add-to-cart btn btn-icon btn-dark animate-slide-end ms-auto d-md-none"
                         aria-label="Thêm vào giỏ hàng">
                         <i class="ci-shopping-cart fs-base animate-target"></i>
                     </button>
@@ -426,6 +426,54 @@
         </div>
     </section>
 
+    <!-- Recently Viewed products (carousel) -->
+    @if($recentlyVieweds && $recentlyVieweds->count() > 0)
+    <section class="container pt-5 mt-2 mt-sm-3 mt-lg-4 mt-xl-5">
+        <div class="d-flex align-items-center justify-content-between pt-1 pt-lg-0 pb-3 mb-2 mb-sm-3">
+            <h2 class="mb-0 me-3">Sản phẩm bạn vừa xem</h2>
+
+            <!-- Slider prev/next buttons -->
+            <div class="d-flex gap-2">
+                <button type="button"
+                    class="btn btn-icon btn-outline-secondary animate-slide-start rounded-circle me-1" id="recentPrev"
+                    aria-label="Prev">
+                    <i class="ci-chevron-left fs-lg animate-target"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-outline-secondary animate-slide-end rounded-circle"
+                    id="recentNext" aria-label="Next">
+                    <i class="ci-chevron-right fs-lg animate-target"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slider -->
+        <div class="swiper"
+            data-swiper="{
+            &quot;slidesPerView&quot;: 2,
+            &quot;spaceBetween&quot;: 24,
+            &quot;loop&quot;: false,
+            &quot;navigation&quot;: {
+              &quot;prevEl&quot;: &quot;#recentPrev&quot;,
+              &quot;nextEl&quot;: &quot;#recentNext&quot;
+            },
+            &quot;breakpoints&quot;: {
+              &quot;768&quot;: {
+                &quot;slidesPerView&quot;: 3
+              },
+              &quot;992&quot;: {
+                &quot;slidesPerView&quot;: 4
+              }
+            }
+          }">
+            <div class="swiper-wrapper">
+                @foreach ($recentlyVieweds as $item)
+                    <x-client.product class="swiper-slide" :product="$item" />
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     @include('client.layouts.brands')
     @include('client.modal.size_guide')
     {{-- @include('client.layouts.instagram_feed') --}}
@@ -437,7 +485,13 @@
                 const sizeEl = $('[name="size"]');
                 const cartEl = $('#shoppingCart');
 
+                let sourceThumbnail = null;
+
                 $('.add-to-cart').click(function(e) {
+                    if (!sourceThumbnail) {
+                        sourceThumbnail = $('#productMainThumbnail');
+                    }
+
                     const url = $(this).data('url');
                     const data = {
                         color: $('[name="color"]:checked').val(),
@@ -447,15 +501,59 @@
 
                     if (!data.size) {
                         toast('Vui lý chọn size', 'warning');
+                        sourceThumbnail = null;
                         return;
                     }
 
                     if (quantityEl.val() == '') {
                         toast('Số lượng không hợp lệ', 'warning');
+                        sourceThumbnail = null;
                         return;
                     }
 
                     ajax(url, 'post', data, function(res) {
+                        // Flying Cart Animation
+                        const cartIcon = $('[data-bs-target="#shoppingCart"]');
+
+                        if (sourceThumbnail.length > 0 && cartIcon.length > 0) {
+                            const flyingImg = sourceThumbnail.clone();
+                            const flyingImgOffset = sourceThumbnail.offset();
+                            const cartIconOffset = cartIcon.offset();
+
+                            flyingImg.css({
+                                'position': 'absolute',
+                                'z-index': 9999,
+                                'top': flyingImgOffset.top,
+                                'left': flyingImgOffset.left,
+                                'width': sourceThumbnail.width() + 'px',
+                                'height': sourceThumbnail.height() + 'px',
+                                'opacity': 0.9,
+                                'border-radius': '10px',
+                                'box-shadow': '0 10px 30px rgba(0,0,0,0.3)',
+                                'transition': 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                            }).appendTo('body');
+
+                            setTimeout(() => {
+                                flyingImg.css({
+                                    'top': cartIconOffset.top + 'px',
+                                    'left': cartIconOffset.left + 'px',
+                                    'width': '20px',
+                                    'height': '20px',
+                                    'opacity': 0.2,
+                                    'transform': 'scale(0.1)'
+                                });
+                            }, 20);
+
+                            setTimeout(() => {
+                                flyingImg.remove();
+                                cartIcon.addClass('animate-shake');
+                                setTimeout(() => cartIcon.removeClass('animate-shake'), 500);
+                            }, 800);
+                        }
+
+                        // reset
+                        sourceThumbnail = null;
+
                         cartEl.find('.offcanvas-body').html(res.data.body);
                         cartEl.find('.offcanvas-footer').html(res.data.footer);
                         $('[data-bs-target="#shoppingCart"] > span').html(res.data.count);
@@ -464,6 +562,31 @@
                             timer: 1000,
                         });
                     });
+                });
+
+                $('.btn-trigger-add-to-cart').click(function(e) {
+                    e.preventDefault();
+                    if ($('#stickyCartThumbnail').is(':visible')) {
+                        sourceThumbnail = $('#stickyCartThumbnail');
+                    } else {
+                        sourceThumbnail = $('#productMainThumbnail');
+                    }
+                    $('.add-to-cart').trigger('click');
+                });
+
+                // Toggle Custom Sticky Bottom Bar
+                const stickyBar = $('#customStickyBottomBar');
+                const mainAddToCartBtn = $('.add-to-cart').first();
+
+                $(window).on('scroll', function() {
+                    if (mainAddToCartBtn.length) {
+                        const btnBottom = mainAddToCartBtn.offset().top + mainAddToCartBtn.outerHeight();
+                        if ($(window).scrollTop() > btnBottom) {
+                            stickyBar.css('transform', 'translateY(0)');
+                        } else {
+                            stickyBar.css('transform', 'translateY(150%)');
+                        }
+                    }
                 });
 
                 // change color

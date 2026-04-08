@@ -89,3 +89,82 @@ docker compose down
 docker compose down -v
 ```
 *(Chỉ sử dụng -v khi bạn chắc chắn và không có dữ liệu quan trọng)*
+
+---
+
+## 7. Cấu hình Biến Môi Trường (.env)
+
+File `.env` là trái tim cấu hình của toàn bộ ứng dụng. Mỗi khi thay đổi bất kỳ biến nào trong file này, bạn **bắt buộc phải xóa cache cấu hình** để Laravel nhận diện thay đổi mới.
+
+```bash
+docker compose exec php-fpm php artisan config:clear
+docker compose exec php-fpm php artisan cache:clear
+```
+
+### Các biến quan trọng cần chú ý:
+
+---
+
+#### `APP_URL` — URL gốc của Website ⚠️ Quan trọng nhất
+
+```env
+APP_URL=http://localhost:9999
+```
+
+> **Lỗi thường gặp nhất:** Nếu giá trị này không khớp với Port/Domain thực tế Website đang chạy, Laravel sẽ tạo **Session Cookie sai domain**. Hậu quả là một số trình duyệt vào được /admin, các trình duyệt khác (Incognito, Firefox...) thì không. Luôn đảm bảo giá trị này đúng với URL bạn đang dùng để truy cập.
+
+Nếu bạn đổi Port trong `docker-compose.yml` (ví dụ: từ `9999` sang `8888`), hãy cập nhật `APP_URL` theo:
+```env
+APP_URL=http://localhost:8888
+```
+
+---
+
+#### `MAIL_*` — Cấu hình gửi Email
+
+Dùng để chức năng **Quên mật khẩu** và **Nhắc thanh toán** hoạt động:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your_gmail@gmail.com
+MAIL_PASSWORD=your_app_password        # Dùng App Password của Google, không phải mật khẩu Gmail
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="your_gmail@gmail.com"
+```
+
+> **Lưu ý:** Với Gmail, bạn phải bật **2-Step Verification** rồi vào **App Passwords** (myaccount.google.com/apppasswords) để tạo mật khẩu riêng cho ứng dụng, KHÔNG được dùng mật khẩu Gmail thông thường.
+
+---
+
+#### `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET` — Đăng nhập Google OAuth
+
+Lấy từ [Google Cloud Console](https://console.cloud.google.com/) → Credentials → OAuth 2.0 Client IDs.
+
+```env
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxx
+```
+
+Nhớ thêm **Authorized redirect URI** vào Google Console: `http://localhost:9999/auth/callback/google`
+
+---
+
+#### `PAYOS_*` — Cổng thanh toán PayOS
+
+Lấy từ dashboard tại [payos.vn](https://payos.vn):
+```env
+PAYOS_CLIENT_ID=your_client_id
+PAYOS_API_KEY=your_api_key
+PAYOS_CHECK_SUM_KEY=your_checksum_key
+```
+
+---
+
+#### `APP_DEBUG` — Chế độ hiển thị lỗi
+
+```env
+APP_DEBUG=false   # Production: tắt để tránh lộ thông tin nhạy cảm
+APP_DEBUG=true    # Development: bật để xem stack trace đầy đủ khi debug
+```
+

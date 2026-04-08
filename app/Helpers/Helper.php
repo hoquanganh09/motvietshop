@@ -108,7 +108,9 @@ function getCartDiscount(CartStatus $status = CartStatus::All, string $key = 'ca
 
         $discountPrice = $cartTotal * ($discount['discount'] / 100);
 
-        if ($discountPrice > $discount['max_price']) {
+        // max_price = giới hạn số tiền được giảm tối đa (cap), không phải giá điều kiện
+        // VD: Coupon giảm 20%, nhưng tối đa 50.000đ
+        if ($discount['max_price'] > 0 && $discountPrice > $discount['max_price']) {
             $discountPrice = $discount['max_price'];
         }
     }

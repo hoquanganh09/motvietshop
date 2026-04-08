@@ -10,11 +10,12 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class Order extends Model
 {
-    use HasFactory, SearchableTrait, ModelScopeTrait;
+    use HasFactory, SearchableTrait, ModelScopeTrait, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -79,17 +80,8 @@ class Order extends Model
 
     public static function generateCode()
     {
-        $code = \Illuminate\Support\Str::random(10);
-
-        $codeExist = self::query()->where('code', $code)->first();
-
-        while ($codeExist) {
-            $code = \Illuminate\Support\Str::random(10);
-
-            $codeExist = self::query()->where('code', $code)->first();
-        }
-
-        return strtoupper($code);
+        // Dùng UUID để tránh race condition khi nhiều user đặt hàng cùng lúc
+        return strtoupper(substr(str_replace('-', '', \Illuminate\Support\Str::uuid()->toString()), 0, 10));
     }
 
     public function orderDetails()
@@ -134,6 +126,13 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shippingAddress()
+    {
+        // Tìm địa chỉ giao hàng khớp số điện thoại của user đặt hàng
+        return $this->hasOne(ShippingAddress::class, 'user_id', 'user_id')
+            ->where('phone_number', \Illuminate\Database\Eloquent\Builder::raw('orders.phone_number'));
     }
 
     public static function searchFields()

@@ -32,7 +32,8 @@ class SendMailForgotPasswordJon implements ShouldQueue
         
         if ($user && $user->isEmailVerified()) {
             $password = \Illuminate\Support\Str::random(8);
-            $user->password = $password;
+            // Fix #1: Phải dùng Hash::make() trước khi lưu, trước đây ghi plaintext vào DB
+            $user->password = \Illuminate\Support\Facades\Hash::make($password);
             $user->save();
 
             Mail::to($this->email)->send(new ForgotPassword($user->fullname, $password));

@@ -13,6 +13,7 @@ use App\Models\Visitor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Services\DashboardService;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
@@ -29,61 +30,34 @@ class HomeController extends Controller
         $filters = $this->dashboardService->getDashboardFilters($type);
         $activeFilter = $this->dashboardService->getFilterActive($filters);
 
-        $earningCount = [
-            'now' => Order::getEarningCount($type),
-            'yesterday' => Order::getEarningCount($type, true),
-        ];
+        $cacheKey = 'dashboard_stats_' . $type;
 
-        $orderCount = [
-            'now' => Order::getOrderByType($type)->count(),
-            'yesterday' => Order::getOrderByType($type, true)->count(),
-        ];
+        // Fix #4: Cache các query nặng 5 phút để giảm tải DB
+        $stats = Cache::remember($cacheKey, 300, function () use ($type) {
+            return [
+                'earningNow'     => Order::getEarningCount($type),
+                'earningPast'    => Order::getEarningCount($type, true),
+                'orderNow'       => Order::getOrderByType($type)->count(),
+                'orderPast'      => Order::getOrderByType($type, true)->count(),
+                'visitorNow'     => Visitor::getVisitorCount($type),
+                'visitorPast'    => Visitor::getVisitorCount($type, true),
+                'customerNow'    => User::getNewCustomersByType($type)->count(),
+                'customerPast'   => User::getNewCustomersByType($type, true)->count(),
+                'recentOrders'   => Order::query()->latest()->limit(8)->where('status', OrderStatus::PENDING->value)->get(),
+                'productDeliverys' => Order::query()->latest()->limit(10)->with(['orderDetails', 'orderDetails.product', 'orderDetails.product.images'])->where('status', '>', OrderStatus::PROCESSING->value)->get(),
+                'bestSellingProducts' => Product::withSum('orderDetails', 'quantity')->orderBy('order_details_sum_quantity', 'desc')->limit(5)->with(['images', 'kind'])->get(),
+                'topRatedProducts' => Product::withAvg('reviews', 'rating')->withCount('reviews')->orderBy('reviews_avg_rating', 'desc')->limit(5)->with(['images', 'kind'])->get(),
+            ];
+        });
 
-        $visitorCount = [
-            'now' => Visitor::getVisitorCount($type),
-            'yesterday' => Visitor::getVisitorCount($type, true),
-        ];
-
-        $newCustomerCount = [
-            'now' => User::getNewCustomersByType($type)->count(),
-            'yesterday' => User::getNewCustomersByType($type, true)->count(),
-        ];
-
-        $recentOrders = Order::query()
-            ->latest()
-            ->limit(8)
-            ->where('status', OrderStatus::PENDING->value)
-            ->get();
-
-        $productDeliverys = Order::query()
-            ->latest()
-            ->limit(10)
-            ->with([
-                'orderDetails',
-                'orderDetails.product',
-                'orderDetails.product.images',
-            ])
-            ->where('status', '>', OrderStatus::PROCESSING->value)
-            ->get();
-
-        $bestSellingProducts = Product::withSum('orderDetails', 'quantity')
-            ->orderBy('order_details_sum_quantity', 'desc')
-            ->limit(5)
-            ->with([
-                'images',
-                'kind',
-            ])
-            ->get();
-
-        $topRatedProducts = Product::withAvg('reviews', 'rating')
-            ->withCount('reviews')
-            ->orderBy('reviews_avg_rating', 'desc')
-            ->limit(5)
-            ->with([
-                'images',
-                'kind',
-            ])
-            ->get();
+        $earningCount     = ['now' => $stats['earningNow'],   'yesterday' => $stats['earningPast']];
+        $orderCount       = ['now' => $stats['orderNow'],     'yesterday' => $stats['orderPast']];
+        $visitorCount     = ['now' => $stats['visitorNow'],   'yesterday' => $stats['visitorPast']];
+        $newCustomerCount = ['now' => $stats['customerNow'],  'yesterday' => $stats['customerPast']];
+        $recentOrders     = $stats['recentOrders'];
+        $productDeliverys = $stats['productDeliverys'];
+        $bestSellingProducts = $stats['bestSellingProducts'];
+        $topRatedProducts = $stats['topRatedProducts'];
 
         return view('admin.home.dashboard', compact(
             'earningCount',
@@ -116,44 +90,33 @@ class HomeController extends Controller
     public function getChartKindSale()
     {
         $type = request('filter', ThongKeType::MONTH->value);
-        $orders = Order::query()->filter($type)
-            ->where('status', '>', OrderStatus::SHIPPING->value)
-            ->with([
-                'orderDetails',
-                'orderDetails.product',
-                'orderDetails.product.kind',
-            ])
-            ->get()
-            ->pluck('orderDetails.*.product.kind')
-            ->flatten();
-
-        $result = $orders->groupBy('id')->map(function ($item) {
-            return [
-                'value' => $item->count(),
-                'name' => $item->first()->name,
-                'id' => $item->first()->id,
-            ];
-        });
-        $result = $result->sortBy('value', SORT_REGULAR, true);
         $maxCount = 10;
 
-        if ($result->count() > $maxCount) {
-            $result = $result->slice(0, $maxCount);
+        // Fix #5: Dùng DB-level GROUP BY thay vì vòng lặp N+1 trên collection
+        $soldKinds = \Illuminate\Support\Facades\DB::table('orders')
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.id')
+            ->join('kinds', 'products.kind_id', '=', 'kinds.id')
+            ->where('orders.status', '>', OrderStatus::SHIPPING->value)
+            ->select('kinds.id', 'kinds.name', \Illuminate\Support\Facades\DB::raw('SUM(order_details.quantity) as value'))
+            ->groupBy('kinds.id', 'kinds.name')
+            ->orderByDesc('value')
+            ->limit($maxCount)
+            ->get();
+
+        $soldKindIds = $soldKinds->pluck('id')->toArray();
+
+        // Lấp đầy các thể loại còn lại nếu chưa đủ $maxCount
+        if ($soldKinds->count() < $maxCount) {
+            $extraKinds = Kind::query()
+                ->whereNotIn('id', $soldKindIds)
+                ->limit($maxCount - $soldKinds->count())
+                ->get()
+                ->map(fn($k) => ['id' => $k->id, 'name' => $k->name, 'value' => 0]);
+
+            $result = $soldKinds->concat($extraKinds);
         } else {
-            $kinds = Kind::query()
-                ->whereNotIn('id', $result->pluck('id')->toArray())
-                ->limit($maxCount - $result->count())
-                ->get();
-
-            $kinds = $kinds->map(function ($item) {
-                return [
-                    'value' => 0,
-                    'name' => $item->name,
-                    'id' => $item->id,
-                ];
-            });
-
-            $result = $result->merge($kinds);
+            $result = $soldKinds;
         }
 
         return response()->json($result->toArray());

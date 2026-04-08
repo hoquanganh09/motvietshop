@@ -101,6 +101,15 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        // Fix #3: Không cho xóa chính mình hoặc xóa Root Admin
+        if ($user->id === auth('admin')->id()) {
+            return response()->json(['message' => 'Không thể xóa tài khoản đang đăng nhập.'], 403);
+        }
+
+        if ($user->isRoot()) {
+            return response()->json(['message' => 'Không thể xóa tài khoản Root Admin.'], 403);
+        }
+
         $user->delete();
 
         return response()->json([

@@ -46,7 +46,7 @@ Route::name('client.')->middleware('visitor')->group(function () {
         });
 
         Route::controller(CouponController::class)->as('coupon.')->group(function () {
-            Route::post('/ap-dung-code', 'apply')->name('apply');
+            Route::post('/ap-dung-code', 'apply')->name('apply')->middleware('throttle:5,1');
         });
 
         Route::controller(OrderController::class)->as('order.')->group(function () {
@@ -66,10 +66,10 @@ Route::name('client.')->middleware('visitor')->group(function () {
         Route::controller(AuthController::class)->as('auth.')->group(function () {
             Route::get('/dang-nhap', 'login')->name('login');
             Route::get('/quen-mat-khau', 'forgotPassword')->name('forgotPassword');
-            Route::post('/xy-ly-quen-mat-khau', 'handleForgotPassword')->name('handleForgotPassword');
-            Route::post('/dang-nhap', 'handleLogin')->name('handleLogin');
+            Route::post('/xy-ly-quen-mat-khau', 'handleForgotPassword')->name('handleForgotPassword')->middleware('throttle:5,1');
+            Route::post('/dang-nhap', 'handleLogin')->name('handleLogin')->middleware('throttle:10,1');
             Route::get('/dang-ky', 'register')->name('register');
-            Route::post('/dang-ky', 'handleRegister')->name('handleRegister');
+            Route::post('/dang-ky', 'handleRegister')->name('handleRegister')->middleware('throttle:5,1');
             Route::get('/auth/redirect/google', 'redirectGoogleLogin')->name('redirectGoogleLogin');
             Route::get('/auth/callback/google', 'callbackGoogleLogin')->name('callbackGoogleLogin');
         });
@@ -80,10 +80,14 @@ Route::name('client.')->middleware('visitor')->group(function () {
         Route::get('/chi-tiet-san-pham/{product}', 'productDetail')->name('productDetail');
         Route::get('/tim-kiem-san-pham', 'productSearch')->name('productSearch');
         Route::get('/loc-san-pham', 'shop')->name('shop');
+        
+        // Tracking Route
+        Route::get('/tra-cuu-don-hang', 'tracking')->name('tracking');
+        Route::post('/tra-cuu-don-hang', 'postTracking')->name('postTracking');
     });
 
     Route::controller(CartController::class)->as('cart.')->group(function () {
-        Route::post('/add-to-cart/{product}', 'addToCart')->name('addToCart');
+        Route::post('/add-to-cart/{product}', 'addToCart')->name('addToCart')->middleware('throttle:30,1');
         Route::delete('/remove-item/{key}', 'removeItem')->name('removeItem');
         Route::post('/update-quantity/{key}', 'updateQuantity')->name('updateQuantity');
         Route::get('/gio-hang', 'showCart')->name('showCart');

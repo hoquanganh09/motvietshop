@@ -104,7 +104,16 @@ class ClientController extends Controller
             ->limit($maximumRelatedProduct)
             ->get();
 
-        return view('client.product.detail', compact('product', 'productVieweds', 'reviews'));
+        $arrProductViewedIds = Session::get('productViewed', []);
+        $recentlyVieweds = Product::query()
+            ->whereIn('id', $arrProductViewedIds)
+            ->where('id', '!=', $product->id)
+            ->active()
+            ->with(Product::getProductRelations())
+            ->limit(10)
+            ->get();
+
+        return view('client.product.detail', compact('product', 'productVieweds', 'reviews', 'recentlyVieweds'));
     }
 
     public function wishlist()
@@ -288,5 +297,28 @@ class ClientController extends Controller
         }
 
         return view('client.home.shop', compact('products', 'kinds', 'sizes', 'colors', 'sort'));
+    }
+
+    public function tracking()
+    {
+        return view('client.home.tracking');
+    }
+
+    public function postTracking(Request $request)
+    {
+        $request->validate([
+            'order_code' => 'required|integer',
+            'phone' => 'required|string'
+        ]);
+
+        // Fix #2: Query trực tiếp phone_number trên bảng orders thay vì whereHas('shippingAddress')
+        // Relationship shippingAddress() dùng Builder::raw() không resolve được trong whereHas
+        $order = Order::query()
+            ->where('id', $request->order_code)
+            ->where('phone_number', $request->phone)
+            ->with(['orderDetails.product', 'orderDetails.product.images'])
+            ->first();
+
+        return view('client.home.tracking', compact('order'))->with('searched', true);
     }
 }

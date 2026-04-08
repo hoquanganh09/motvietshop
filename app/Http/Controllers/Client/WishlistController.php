@@ -35,12 +35,14 @@ class WishlistController extends Controller
     {
         $productIds = $request->input('product_id');
 
+        // Fix #3: Phải filter theo user_id, trước đây ai cũng xóa được wishlist của người khác
         Wishlist::query()
+            ->where('user_id', auth()->id())
             ->whereIn('product_id', $productIds)
             ->delete();
 
         return response()->json([
-            'message' => 'Xóa sản phẩm yêu thích thành công.'
+            'message' => 'Xóa sản phẩm yêu thích thành công.'
         ]);
     }
 }

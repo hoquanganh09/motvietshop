@@ -57,11 +57,15 @@ class AuthController extends Controller
 
     public function callbackGoogleLogin()
     {
-        $user = app()->make(LoginSocialAction::class)->handle();
-
-        Auth::login($user, true);
-
-        return to_route('client.home.index');
+        try {
+            $user = app()->make(LoginSocialAction::class)->handle();
+            Auth::login($user, true);
+            return to_route('client.home.index');
+        } catch (\Exception $e) {
+            // Fix #5: Nếu user nhấn Cancel ở màn hình Google thì Socialite throw exception
+            // Trước đây không có try/catch nên server crash 500
+            return to_route('auth.login')->with('error', 'Đăng nhập Google không thành công. Vui lòng thử lại.');
+        }
     }
 
     public function logout()

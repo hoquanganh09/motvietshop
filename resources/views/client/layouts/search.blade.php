@@ -1,9 +1,14 @@
 <div class="offcanvas offcanvas-top" id="searchBox" data-bs-backdrop="static" tabindex="-1">
     <div class="offcanvas-header border-bottom p-0 py-lg-1">
-        <form class="container d-flex align-items-center" action="{{ route('client.home.shop') }}" method="get">
-            <input name="keyword" type="search" class="form-control form-control-lg fs-lg border-0 rounded-0 py-3 ps-0"
+        <form class="container d-flex align-items-center position-relative" action="{{ route('client.home.shop') }}" method="get">
+            <input id="searchInput" name="keyword" type="search" class="form-control form-control-lg fs-lg border-0 rounded-0 py-3 ps-0"
                 placeholder="Tìm kiếm sản phẩm" data-autofocus="offcanvas">
-            <button type="reset" class="btn-close fs-lg" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            
+            <div id="searchSpinner" class="spinner-border spinner-border-sm text-secondary position-absolute end-0 me-5 d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+
+            <button type="reset" class="btn-close fs-lg ms-2" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </form>
     </div>
     <div class="offcanvas-body px-0">
@@ -31,8 +36,13 @@
             const input = parent.find('input[type="search"]');
             const result = parent.find('#search-result');
             const resultDefault = parent.find('#search-result-default');
-            const delay = 500;
+            const spinner = parent.find('#searchSpinner');
+            const delay = 200; // Reduced from 500ms
             let clear = null;
+
+            parent.on('shown.bs.offcanvas', function () {
+                input.focus();
+            });
 
             input.on('input', function() {
                 if (clear) {
@@ -40,10 +50,14 @@
                     clear = null;
                 }
 
+                spinner.removeClass('d-none');
+
                 clear = setTimeout(() => {
                     ajax(`{{ route('client.home.productSearch') }}`, 'get', {
                         keyword: input.val()
                     }, function(res) {
+                        spinner.addClass('d-none');
+
                         if (res.data.count > 0) {
                             resultDefault.hide();
                         } else {

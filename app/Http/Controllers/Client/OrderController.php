@@ -43,6 +43,11 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        // Fix #4: Chỉ chủ nhân đơn hàng mới được xem
+        if ($order->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Không có quyền thực hiện'], 403);
+        }
+
         $order->load(['orderDetails', 'orderDetails.product', 'orderDetails.product.images', 'orderDetails.color', 'orderDetails.size']);
 
         return response()->json([
@@ -54,6 +59,11 @@ class OrderController extends Controller
 
     public function cancel(Order $order)
     {
+        // Fix #4: Chỉ chủ nhân đơn hàng mới được hủy
+        if ($order->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Không có quyền thực hiện'], 403);
+        }
+
         if (!$order->canCancel()) {
             return response()->json([
                 'message' => 'Không thể hủy đơn hàng',
@@ -64,7 +74,7 @@ class OrderController extends Controller
         $order->save();
 
         return response()->json([
-            'message' => 'Hủy đơn hàng thành công',
+            'message' => 'Hủy đơn hàng thành công',
             'header' => view('client.modal.common.order_detail_header', compact('order'))->render(),
             'footer' => view('client.modal.common.order_detail_footer', compact('order'))->render(),
         ]);
@@ -72,6 +82,11 @@ class OrderController extends Controller
 
     public function shipped(Order $order)
     {
+        // Fix #4: Chỉ chủ nhân đơn hàng mới được xác nhận nhận hàng
+        if ($order->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Không có quyền thực hiện'], 403);
+        }
+
         if (!$order->canReview('web')) {
             return response()->json([
                 'message' => 'Không thể đổi trạng thái đơn hàng',
@@ -83,7 +98,7 @@ class OrderController extends Controller
         $order->save();
 
         return response()->json([
-            'message' => 'Đổi trạng thái đơn hàng thành công',
+            'message' => 'Đổi trạng thái đơn hàng thành công',
             'header' => view('client.modal.common.order_detail_header', compact('order'))->render(),
             'footer' => view('client.modal.common.order_detail_footer', compact('order'))->render(),
         ]);
@@ -91,6 +106,11 @@ class OrderController extends Controller
 
     public function showNeedReviews(Order $order)
     {
+        // Fix #4: Chỉ chủ nhân được xem danh sách cần đánh giá
+        if ($order->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Không có quyền thực hiện'], 403);
+        }
+
         $order->load(['orderDetails', 'reviews', 'orderDetails.product', 'orderDetails.product.images', 'orderDetails.product.kind']);
 
         return response()->view('client.modal.common.product_review_body', compact('order'));

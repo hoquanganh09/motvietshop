@@ -6,10 +6,11 @@ use App\Traits\ModelScopeTrait;
 use App\Traits\UploadFileTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, ModelScopeTrait, SearchableTrait;
+    use HasFactory, ModelScopeTrait, SearchableTrait, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -78,7 +79,7 @@ class Product extends Model
 
     public function isSale(): bool
     {
-        return $this->old_price ? true : false;
+        return $this->old_price && $this->price < $this->old_price;
     }
 
     public function getDiscount(): int

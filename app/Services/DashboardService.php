@@ -118,7 +118,7 @@ class DashboardService
                     $this->getDataBetweenTime($data, '04:00', '07:59')->sum($field),
                     $this->getDataBetweenTime($data, '08:00', '11:59')->sum($field),
                     $this->getDataBetweenTime($data, '12:00', '15:59')->sum($field),
-                    $this->getDataBetweenTime($data, '14:00', '19:59')->sum($field),
+                    $this->getDataBetweenTime($data, '16:00', '19:59')->sum($field),
                     $this->getDataBetweenTime($data, '20:00', '23:59')->sum($field),
                 ];
                 break;

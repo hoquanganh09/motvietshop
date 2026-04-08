@@ -13,10 +13,25 @@ class CartController extends Controller
 {
     public function addToCart(Request $request, Product $product)
     {
+        // Fix #5: Kiểm tra tồn kho trước khi thêm vào giỏ
+        if (!$product->isInStock()) {
+            return response()->json([
+                'message' => 'Sản phẩm này đã hết hàng.',
+            ], 422);
+        }
+
         $carts = Session::get('cart', []);
         $key = $product->id . '-' . $request->input('color') . '-' . $request->input('size');
         $color = Color::findOrFail($request->input('color'));
         $size = Size::findOrFail($request->input('size'));
+
+        $currentQuantity = ($carts[$key]['quantity'] ?? 0) + $request->input('quantity', 1);
+
+        if ($currentQuantity > $product->stock) {
+            return response()->json([
+                'message' => 'Số lượng vượt quá tồn kho (còn lại: ' . $product->stock . ').',
+            ], 422);
+        }
 
         $carts[$key] = [
             'id' => $product->id,
@@ -28,7 +43,7 @@ class CartController extends Controller
             'color_name' => $color->name,
             'color_label' => $color->label,
             'size_name' => $size->name,
-            'quantity' => ($carts[$key]['quantity'] ?? 0) + $request->input('quantity', 1),
+            'quantity' => $currentQuantity,
             'color' => $color->id,
             'size' => $size->id,
             'key' => $key,
@@ -42,7 +57,7 @@ class CartController extends Controller
             'body' => view('client.modal.common.shopping_cart_body')->render(),
             'footer' => view('client.modal.common.shopping_cart_footer')->render(),
             'count' => count($carts),
-            'message' => 'Thêm vào giỏ hàng thành công.',
+            'message' => 'Thêm vào giỏ hàng thành công.',
         ]);
     }
 

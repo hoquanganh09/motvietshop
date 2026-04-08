@@ -74,7 +74,6 @@ class ProductController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
-        // dd($request->validated());
         $success = app()->make(CreateProductAction::class)->handle($request->validated());
 
         if (!$success) {

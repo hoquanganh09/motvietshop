@@ -1,6 +1,6 @@
 <header class="navbar navbar-expand-lg navbar-sticky bg-body d-block z-fixed p-0"
     data-sticky-navbar="{&quot;offset&quot;: 500}">
-    <div class="container py-2 py-lg-3">
+    <div class="container py-1 py-lg-2">
         <div class="d-flex align-items-center gap-3">
 
             <!-- Mobile offcanvas menu toggler (Hamburger) -->
@@ -13,7 +13,7 @@
         <!-- Navbar brand (Logo) -->
         <a class="navbar-brand fs-2 py-0 m-0 me-auto me-sm-n5"
             href="{{ route('client.home.index') }}">
-            <img style="height: 80px;" src="{{ getLogo() }}" class="img-fluid" alt="logo">
+            <img style="height: 55px;" src="{{ getLogo() }}" class="img-fluid" alt="logo">
         </a>
 
         <!-- Button group -->
@@ -32,6 +32,21 @@
                 data-bs-toggle="offcanvas" data-bs-target="#searchBox" aria-controls="searchBox"
                 aria-label="Toggle search bar">
                 <i class="ci-search animate-target"></i>
+            </button>
+
+            <!-- Order Tracking Button -->
+            <a href="{{ route('client.home.tracking') }}"
+                class="btn btn-icon btn-lg fs-xl btn-outline-secondary border-0 rounded-circle animate-pulse d-none d-md-inline-flex"
+                data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tra cứu vận đơn"
+                aria-label="Tra cứu đơn hàng">
+                <i class="ci-package animate-target"></i>
+            </a>
+
+            <!-- Theme toggle button -->
+            <button type="button" id="themeToggleBtn"
+                class="btn btn-icon btn-lg fs-xl btn-outline-secondary border-0 rounded-circle animate-pulse d-none d-md-inline-flex"
+                aria-label="Toggle theme">
+                <i class="ci-moon animate-target"></i>
             </button>
 
             <!-- Wishlist button visible on screens > 768px wide (md breakpoint) -->
