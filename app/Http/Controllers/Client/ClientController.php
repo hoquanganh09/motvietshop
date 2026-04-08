@@ -120,6 +120,7 @@ class ClientController extends Controller
     {
         $wishlists = Wishlist::query()
             ->with(['product', 'product.images'])
+            ->where('user_id', Auth::id())
             ->paginate();
 
         return view('client.home.wishlist', compact('wishlists'));
@@ -185,7 +186,9 @@ class ClientController extends Controller
 
     public function orderSuccess()
     {
-        $order = Order::query()->find(request()->input('orderCode'));
+        $order = Order::query()
+            ->where('user_id', Auth::id())
+            ->find(request()->input('orderCode'));
 
         if (!$order) {
             return abort(404);

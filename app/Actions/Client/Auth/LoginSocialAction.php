@@ -31,7 +31,6 @@ class LoginSocialAction
         if ($user) {
             $user->provider = 'google';
             $user->social_id = $ggUser->getId();
-            $user->is_active = 1;
 
             $user->save();
         } else {

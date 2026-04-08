@@ -8,7 +8,9 @@ use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Order\StoreOrderRequest;
 use App\Models\Order;
+use App\Models\Product;
 use App\Services\OrderService;
+use Illuminate\Support\Facades\DB;
 use App\Services\PayOS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -70,8 +72,17 @@ class OrderController extends Controller
             ], 400); 
         }
 
-        $order->status = OrderStatus::CANCEL->value;
-        $order->save();
+        // C11: Restore stock for all order items on cancel
+        $order->load('orderDetails');
+
+        DB::transaction(function () use ($order) {
+            $order->status = OrderStatus::CANCEL->value;
+            $order->save();
+
+            foreach ($order->orderDetails as $detail) {
+                Product::where('id', $detail->product_id)->increment('stock', $detail->quantity);
+            }
+        });
 
         return response()->json([
             'message' => 'Hủy đơn hàng thành công',

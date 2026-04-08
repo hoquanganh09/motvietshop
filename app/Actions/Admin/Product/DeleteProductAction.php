@@ -31,10 +31,11 @@ class DeleteProductAction
 
             $product->sizes()->delete();
             $product->colors()->delete();
+            $result = $product->delete();
 
             DB::commit();
 
-            return $product->delete();
+            return $result;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 

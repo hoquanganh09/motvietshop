@@ -9,6 +9,7 @@ use App\Http\Requests\Client\ShippingAddress\StoreShippingAddressRequest;
 use App\Http\Requests\Client\ShippingAddress\UpdateShippingAddressRequest;
 use App\Models\ShippingAddress;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ShippingAddressController extends Controller
 {
@@ -23,6 +24,8 @@ class ShippingAddressController extends Controller
 
     public function update(UpdateShippingAddressRequest $request, ShippingAddress $shippingAddress)
     {
+        abort_if($shippingAddress->user_id !== Auth::id(), 403);
+
         app()->make(UpdateShippingAddressAction::class)->handle($request->validated(), $shippingAddress);
 
         return redirect()->back()->with('success', 'Cập nhật địa chỉ giao hàng thành công.');
@@ -30,6 +33,8 @@ class ShippingAddressController extends Controller
 
     public function destroy(ShippingAddress $shippingAddress)
     {
+        abort_if($shippingAddress->user_id !== Auth::id(), 403);
+
         if ($shippingAddress->isDefault()) {
             ShippingAddress::where('user_id', $shippingAddress->user_id)
                 ->where('id', '!=', $shippingAddress->id)

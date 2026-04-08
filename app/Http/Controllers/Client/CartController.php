@@ -78,6 +78,9 @@ class CartController extends Controller
 
     public function updateQuantity(Request $request, string $key)
     {
+        // C8: Validate quantity to prevent unbounded/untyped input
+        $request->validate(['quantity' => 'required|integer|min:1|max:1000']);
+
         $carts = Session::get('cart', []);
 
         $carts[$key]['quantity'] = $request->input('quantity');

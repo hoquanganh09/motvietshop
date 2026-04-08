@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 
@@ -13,16 +14,16 @@ class WishlistController extends Controller
         return view('client.home.wishlist');
     }
 
-    public function store(string|int $product)
+    public function store(Product $product)
     {
         $wishlist = Wishlist::query()
             ->where('user_id', auth()->user()->id)
-            ->where('product_id', $product)->first();
+            ->where('product_id', $product->id)->first();
 
         if (!$wishlist) {
             Wishlist::create([
                 'user_id' => auth()->user()->id,
-                'product_id' => $product
+                'product_id' => $product->id
             ]);
         }
 

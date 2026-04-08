@@ -21,6 +21,8 @@ class LogoutAction
     public function handle()
     {
         Auth::guard('admin')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
         return true;
     }

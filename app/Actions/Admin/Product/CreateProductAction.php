@@ -50,7 +50,7 @@ class CreateProductAction
             // images
             if (isset($data['images']) && count($data['images']) > 0) {
                 foreach ($data['images'] as $image) {
-                    $imagse[] = $this->uploadProductImage($image, $product->id, false);
+                    $images[] = $this->uploadProductImage($image, $product->id, false);
                 }
             }
 

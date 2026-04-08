@@ -31,6 +31,8 @@ class SendMailOrderCreated implements ShouldQueue
     {
         $user = User::find($this->userId);
 
+        if (!$user) return;
+
         if ($user->has_send_email_order && $user->isEmailVerified()) {
             Mail::to($user->email)->send(new OrderCreated($user->fullname, $this->order->code));
         }

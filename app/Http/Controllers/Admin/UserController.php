@@ -94,6 +94,15 @@ class UserController extends Controller
 
     public function resetPassword(Request $request)
     {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $target = User::where('email', $request->email)->firstOrFail();
+
+        // Only a root/superadmin can reset another root account's password
+        if ($target->isRoot() && !auth('admin')->user()->isRoot()) {
+            abort(403, 'Không có quyền reset mật khẩu tài khoản Root Admin.');
+        }
+
         SendMailForgotPasswordJon::dispatch($request->email);
 
         return back()->with('success', 'Gửi mail reset mật khẩu thành công');

@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CouponController;
 use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\PayOSWebhookController;
 use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\ShippingAddressController;
 use App\Http\Controllers\Client\UserController;
@@ -101,3 +102,7 @@ Route::middleware('customAuth:web')->group(function () {
         Route::get('/email/verify/{id}/{hash}', 'handleVerifyEmail')->name('verification.verify');
     });
 });
+
+// PayOS server-side webhook — CSRF exempt, no auth required
+Route::post('/payment/webhook', [PayOSWebhookController::class, 'handle'])
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);

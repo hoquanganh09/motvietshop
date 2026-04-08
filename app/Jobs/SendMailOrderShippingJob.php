@@ -31,6 +31,8 @@ class SendMailOrderShippingJob implements ShouldQueue
     {
         $user = User::find($this->userId);
 
+        if (!$user) return;
+
         if ($user->has_send_email_shipping && $user->isEmailVerified()) {
             Mail::to($user->email)->send(new OrderShipping($user->fullname, $this->order->code));
         }

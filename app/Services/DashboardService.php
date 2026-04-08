@@ -176,7 +176,7 @@ class DashboardService
         $end = Carbon::parse($end);
 
         return $data->filter(function ($item) use ($start, $end) {
-            $check = Carbon::parse($item->created_at->format('H:m'));
+            $check = Carbon::parse($item->created_at->format('H:i'));
 
             return $check >= $start && $check <= $end;
         });

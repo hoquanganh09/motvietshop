@@ -96,7 +96,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('customGuest:admin')->group(function () {
         Route::controller(AuthController::class)->as('auth.')->group(function () {
             Route::get('/dang-nhap', 'login')->name('login');
-            Route::post('/dang-nhap', 'handleLogin')->name('handleLogin');
+            Route::post('/dang-nhap', 'handleLogin')->name('handleLogin')->middleware('throttle:5,1');
         });
     });
 

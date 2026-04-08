@@ -132,7 +132,7 @@ class Order extends Model
     {
         // Tìm địa chỉ giao hàng khớp số điện thoại của user đặt hàng
         return $this->hasOne(ShippingAddress::class, 'user_id', 'user_id')
-            ->where('phone_number', \Illuminate\Database\Eloquent\Builder::raw('orders.phone_number'));
+            ->whereColumn('shipping_addresses.phone_number', 'orders.phone_number');
     }
 
     public static function searchFields()
@@ -157,7 +157,7 @@ class Order extends Model
     public static function getEarningCount(string $type, bool $isPast = false)
     {
         $query =  self::query()
-            ->whereStatus(OrderStatus::SHIPPED->value)
+            ->whereIn('status', [OrderStatus::SHIPPED->value, OrderStatus::COMPLETED->value])
             ->filter($type, $isPast);
 
         return $query->sum('total');

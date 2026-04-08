@@ -40,18 +40,28 @@ class OrderService
         DB::beginTransaction();
         try {
             if ($discount) {
+                // C10: Re-fetch coupon with lock to prevent race condition on amount
+                $coupon = Coupon::lockForUpdate()->find($discount['id']);
+                if (!$coupon || $coupon->amount <= 0) {
+                    throw new \Exception('Mã giảm giá không còn hiệu lực');
+                }
                 $data = [
                     ...$data,
                     'discount' => getCartDiscount(CartStatus::NotDisabled, 'final_cart'),
                     'discount_code' => $discount['code'],
                 ];
-                Coupon::query()->where('id', $discount['id'])->limit(1)->decrement('amount');
+                $coupon->decrement('amount');
             }
 
             $order = Order::create($data);
 
             foreach ($cart as $item) {
-                Product::query()->where('id', $item['id'])->decrement('stock', $item['quantity']);
+                // C7: Lock product row and check stock before decrementing to prevent oversell
+                $product = Product::lockForUpdate()->find($item['id']);
+                if (!$product || $product->stock < $item['quantity']) {
+                    throw new \Exception('Sản phẩm "' . ($product->name ?? $item['id']) . '" không đủ số lượng trong kho');
+                }
+                $product->decrement('stock', $item['quantity']);
                 $order->orderDetails()->create([
                     'product_id' => $item['id'],
                     'color_id' => $item['color'],

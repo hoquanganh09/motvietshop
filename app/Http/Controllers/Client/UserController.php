@@ -47,6 +47,11 @@ class UserController extends Controller
 
     public function changeNoti(Request $request)
     {
+        $request->validate([
+            'has_send_email_order' => 'sometimes|boolean',
+            'has_send_email_shipping' => 'sometimes|boolean',
+        ]);
+
         $attrs = [
             'order' => 'has_send_email_order',
             'shipping' => 'has_send_email_shipping',

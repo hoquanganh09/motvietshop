@@ -28,6 +28,7 @@ class LoginAction
         $remember = $data['remember'] ?? false;
 
         if (Auth::attempt($attempt, $remember) && Auth::user()->isActive()) {
+            request()->session()->regenerate();
             return true;
         }
 

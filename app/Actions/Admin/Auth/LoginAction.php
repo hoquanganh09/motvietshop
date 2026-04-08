@@ -25,6 +25,7 @@ class LoginAction
         $remember = $request->boolean('remember');
 
         if (Auth::guard('admin')->attempt($validated, $remember) && Auth::guard('admin')->user()->role !== Role::USER && Auth::guard('admin')->user()->isActive()) {
+            $request->session()->regenerate();
             return true;
         }
         Auth::guard('admin')->logout();

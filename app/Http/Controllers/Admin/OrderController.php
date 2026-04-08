@@ -68,6 +68,10 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order, UpdateOrderStatusAction $updateAction)
     {
+        $request->validate([
+            'status' => ['required', \Illuminate\Validation\Rule::in(array_column(\App\Enums\OrderStatus::cases(), 'value'))],
+        ]);
+
         $success = $updateAction->handle($order, $request->input('status'));
 
         return redirect()->back()->with($success ? 'success' : 'error', $success ? 'Cập nhật trạng thái đơn hàng thành công' : 'Cập nhật thất bại');
