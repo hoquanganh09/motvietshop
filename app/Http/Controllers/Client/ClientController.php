@@ -164,45 +164,12 @@ class ClientController extends Controller
             ->first();
 
         session()->put('discount', null);
-        $errorQuantity = false;
         $cart = session()->get('cart', []);
-        $products = collect($cart);
-        $productIds = array_values($products->map(fn($item) => $item['id'])->toArray());
-        $productsGroup = $products->groupBy('id');
-        $orderProductQuantity = [];
-        $productAppendQuantity = [];
 
-        foreach ($productsGroup as $key => $item) {
-            $orderProductQuantity[$key] = [
-                'id' => $key,
-                'quantity' => $item->sum('quantity'),
-            ];
-        }
-
-        $productAvaiables = Product::query()
-            ->whereIn('id', $productIds)
-            ->get();
-
-        foreach ($productAvaiables as $item) {
-            $productAppendQuantity[$item->id] = 0;
-
-            if ($item->stock < $orderProductQuantity[$item->id]['quantity']) {
-                $errorQuantity = true;
-                $productAppendQuantity[$item->id] = $orderProductQuantity[$item->id]['quantity'] - $item->stock;
-            }
-        }
-
-        $cart = array_reverse($cart);
-        $cart = array_map(function ($item) use (&$productAppendQuantity) {
-            $item['disabled'] = false;
-            if ($productAppendQuantity[$item['id']] > 0) {
-                $item['disabled'] = true;
-                $productAppendQuantity[$item['id']] -= $item['quantity'];
-            }
-            return $item;
-        }, $cart);
-
-        $cart = array_reverse($cart);
+        $result = app()->make(\App\Actions\Client\Checkout\CalculateCartQuantityAction::class)->handle($cart);
+        $cart = $result['cart'];
+        $products = $result['products'];
+        $errorQuantity = $result['errorQuantity'];
 
         session()->put('cart', $cart);
         session()->put('final_cart', $cart);
@@ -312,29 +279,12 @@ class ClientController extends Controller
             ];
         }
 
-        $products = Product::search($keyword)
-            ->active()
-            ->with([
-                'images',
-                'sizes',
-                'sizes.size',
-                'colors',
-                'colors.color',
-            ])
-            ->whereIn('kind_id', $filters['kind'])
-            ->where(function ($query) use ($filters) {
-                $query->where('price', '>=', $filters['min_price'])
-                    ->where('price', '<=', $filters['max_price']);
-            })
-            ->join('product_sizes as ps', 'products.id', '=', 'ps.product_id')
-            ->whereIn('ps.size_id', $filters['size'])
-            ->join('product_colors as pc', 'products.id', '=', 'pc.product_id')
-            ->whereIn('pc.color_id', $filters['color'])
-            ->when($isSale, fn($query) => $query->whereNotNull('old_price'))
-            ->groupBy('products.id')
-            ->select('products.*')
-            ->orderBy('products.' . explode(':', $sort)[0], explode(':', $sort)[1])
-            ->paginate();
+        $products = app()->make(\App\Actions\Client\Product\GetShopProductsAction::class)->handle(
+            filters: $filters,
+            keyword: $keyword,
+            sort: $sort,
+            isSale: $isSale
+        );
 
         if (request()->ajax()) {
             return response()->view('client.home.common.shop_product_grid', compact('products', 'sort'));

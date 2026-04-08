@@ -84,13 +84,6 @@ class ProductController extends Controller
         return to_route('admin.product.index')->with('success', 'Thêm mới sản phẩm thành công.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
