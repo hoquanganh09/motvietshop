@@ -1,0 +1,22 @@
+name: Update Composer Lock
+on: [push, workflow_dispatch]
+permissions:
+  contents: write
+jobs:
+  update-composer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Run Composer Update
+        run: composer update --no-interaction
+      - name: Commit Changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add composer.lock
+          git commit -m "Auto-update composer.lock to secure deps" || echo "No changes"
+          git push
