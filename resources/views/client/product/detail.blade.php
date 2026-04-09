@@ -1,4 +1,43 @@
 <x-client.layout.home>
+    @push('head-meta')
+        @php
+            $metaDesc = $product->description ? Str::limit(strip_tags($product->description), 160) : $product->name;
+            $metaImage = $product->getThumbnail();
+        @endphp
+        <title>{{ $product->name }} — {{ config('app.name') }}</title>
+        <meta name="description" content="{{ $metaDesc }}">
+        <meta property="og:title" content="{{ $product->name }}">
+        <meta property="og:description" content="{{ $metaDesc }}">
+        <meta property="og:image" content="{{ $metaImage }}">
+        <meta property="og:url" content="{{ request()->url() }}">
+        <meta property="og:type" content="product">
+        <meta property="og:availability" content="{{ $product->stock > 0 ? 'in stock' : 'out of stock' }}">
+        <meta name="twitter:title" content="{{ $product->name }}">
+        <meta name="twitter:description" content="{{ $metaDesc }}">
+        <meta name="twitter:image" content="{{ $metaImage }}">
+        <!-- JSON-LD Product Schema -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "{{ addslashes($product->name) }}",
+            "description": "{{ addslashes($metaDesc) }}",
+            "image": "{{ $metaImage }}",
+            "url": "{{ request()->url() }}",
+            "offers": {
+                "@type": "Offer",
+                "price": "{{ $product->price }}",
+                "priceCurrency": "VND",
+                "availability": "{{ $product->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}"
+            }@if($product->reviews->count() > 0),
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "{{ round($product->reviews->avg('rating'), 1) }}",
+                "reviewCount": "{{ $product->reviews->count() }}"
+            }@endif
+        }
+        </script>
+    @endpush
     @push('plugin-css')
         <link rel="stylesheet" href="{{ asset('plugins/glightbox/glightbox.min.css') }}">
     @endpush
@@ -87,12 +126,33 @@
                     <!-- Title -->
                     <h1 class="h3">{{ $product->name }}</h1>
 
+                    @if ($product->isOnFlashSale())
+                        <!-- Flash Sale badge + countdown -->
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="badge text-bg-danger fs-xs">
+                                <i class="ci-bolt me-1"></i>FLASH SALE
+                            </span>
+                            <span class="fs-sm text-body-secondary">Kết thúc sau:
+                                <strong class="text-danger" id="flashSaleCountdown"
+                                    data-end="{{ $product->sale_end->timestamp }}"></strong>
+                            </span>
+                        </div>
+                    @endif
+
                     <div class="h4 d-flex align-items-center my-4">
-                        {{ formatMoney($product->price) }}
-                        @if ($product->isSale())
-                            <del class="fs-sm fw-normal text-body-tertiary ms-2">
-                                {{ formatMoney($product->old_price) }}
-                            </del>
+                        @if ($product->isOnFlashSale())
+                            <span class="text-danger">{{ formatMoney($product->getCurrentPrice()) }}</span>
+                            <del class="fs-sm fw-normal text-body-tertiary ms-2">{{ formatMoney($product->price) }}</del>
+                            <span class="badge text-bg-danger fs-xs ms-2">
+                                -{{ round(($product->price - $product->getCurrentPrice()) / $product->price * 100) }}%
+                            </span>
+                        @else
+                            {{ formatMoney($product->price) }}
+                            @if ($product->isSale())
+                                <del class="fs-sm fw-normal text-body-tertiary ms-2">
+                                    {{ formatMoney($product->old_price) }}
+                                </del>
+                            @endif
                         @endif
                     </div>
 
@@ -156,6 +216,23 @@
                         <button @if ($product->sizes->count() == 0 || $product->colors->count() == 0) disabled @endif
                             data-url="{{ route('client.cart.addToCart', $product->id) }}" type="button"
                             class="add-to-cart btn btn-lg btn-dark w-100">Thêm vào giỏ hàng</button>
+                    </div>
+
+                    <!-- Social sharing -->
+                    <div class="d-flex align-items-center gap-2 pb-3 mb-2">
+                        <span class="fs-sm text-body-secondary me-1">Chia sẻ:</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->url()) }}"
+                            target="_blank" rel="noopener noreferrer"
+                            class="btn btn-sm btn-icon btn-secondary rounded-circle"
+                            data-bs-toggle="tooltip" data-bs-title="Chia sẻ Facebook">
+                            <i class="ci-facebook fs-sm"></i>
+                        </a>
+                        <button type="button"
+                            class="btn btn-sm btn-icon btn-secondary rounded-circle btn-copy-product-link"
+                            data-url="{{ request()->url() }}"
+                            data-bs-toggle="tooltip" data-bs-title="Sao chép liên kết">
+                            <i class="ci-link fs-sm"></i>
+                        </button>
                     </div>
 
                     <!-- Info list -->
@@ -323,15 +400,13 @@
             <!-- Reviews tab -->
             <div class="tab-pane fade" id="reviews-tab-pane" role="tabpanel" aria-labelledby="reviews-tab">
 
-                <!-- Heading + Add review button -->
-                <div class="d-sm-flex align-items-center justify-content-between border-bottom pb-2 pb-sm-3">
-                    <div class="mb-3 me-sm-3">
+                <!-- Heading + Rating distribution -->
+                <div class="d-sm-flex align-items-start justify-content-between border-bottom pb-3 mb-2">
+                    <div class="mb-3 me-sm-4">
                         <h2 class="h5 pb-2 mb-1">Đánh giá của khách hàng</h2>
                         <div class="d-flex align-items-center text-body-secondary fs-sm">
+                            @php $avg = $product->reviews->avg('rating'); @endphp
                             <div class="d-flex gap-1 me-2">
-                                @php
-                                    $avg = $product->reviews->avg('rating');
-                                @endphp
                                 @for ($i = 0; $i < 5; $i++)
                                     @if ($i < round($avg, 0, 2))
                                         <i class="ci-star-filled text-warning"></i>
@@ -340,9 +415,24 @@
                                     @endif
                                 @endfor
                             </div>
-                            {{ $avg }}/5 sao dựa trên {{ $reviews->total() }} đánh giá
+                            {{ number_format($avg, 1) }}/5 sao dựa trên {{ $reviews->total() }} đánh giá
                         </div>
                     </div>
+                    @if ($totalReviews > 0)
+                        <!-- Star distribution bars -->
+                        <div class="flex-shrink-0" style="min-width: 220px">
+                            @for ($star = 5; $star >= 1; $star--)
+                                @php $count = $ratingDistribution[$star] ?? 0; $pct = $totalReviews > 0 ? round($count / $totalReviews * 100) : 0; @endphp
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fs-xs text-nowrap" style="width:30px">{{ $star }} <i class="ci-star-filled text-warning" style="font-size:10px"></i></span>
+                                    <div class="progress flex-grow-1" style="height:6px">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width:{{ $pct }}%"></div>
+                                    </div>
+                                    <span class="fs-xs text-body-secondary" style="width:28px">{{ $count }}</span>
+                                </div>
+                            @endfor
+                        </div>
+                    @endif
                 </div>
 
                 @foreach ($reviews as $item)
@@ -493,6 +583,7 @@
                     }
 
                     const url = $(this).data('url');
+                    const $addBtn = $(this);
                     const data = {
                         color: $('[name="color"]:checked').val(),
                         size: sizeEl.val(),
@@ -511,7 +602,13 @@
                         return;
                     }
 
+                    // Show loading state
+                    $addBtn.prop('disabled', true).html(
+                        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+                    );
+
                     ajax(url, 'post', data, function(res) {
+                        $addBtn.prop('disabled', false).html('Thêm vào giỏ hàng');
                         // Flying Cart Animation
                         const cartIcon = $('[data-bs-target="#shoppingCart"]');
 
@@ -561,6 +658,10 @@
                         toast(res.data.message, 'success', {
                             timer: 1000,
                         });
+                    }, function() {
+                        // Restore button on error (global toast already shown by axios interceptor)
+                        $addBtn.prop('disabled', false).html('Thêm vào giỏ hàng');
+                        sourceThumbnail = null;
                     });
                 });
 
@@ -613,6 +714,33 @@
                             toast(res.data.message);
                         });
                     }, timer);
+                });
+
+                // Flash sale countdown timer
+                const countdownEl = document.getElementById('flashSaleCountdown');
+                if (countdownEl) {
+                    const endTime = parseInt(countdownEl.dataset.end) * 1000;
+                    function updateCountdown() {
+                        const remaining = endTime - Date.now();
+                        if (remaining <= 0) {
+                            countdownEl.textContent = 'Đã kết thúc';
+                            return;
+                        }
+                        const h = Math.floor(remaining / 3600000);
+                        const m = Math.floor((remaining % 3600000) / 60000);
+                        const s = Math.floor((remaining % 60000) / 1000);
+                        countdownEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                    }
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                }
+
+                // Copy product link to clipboard
+                $(document).on('click', '.btn-copy-product-link', function() {
+                    const url = $(this).data('url');
+                    navigator.clipboard.writeText(url).then(() => {
+                        toast('Đã sao chép liên kết!', 'success', { timer: 1500 });
+                    });
                 });
 
                 $(document).on('input', '.btn-quantity-detail', function() {

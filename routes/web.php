@@ -3,12 +3,15 @@
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
+use App\Http\Controllers\Client\CompareController;
 use App\Http\Controllers\Client\CouponController;
+use App\Http\Controllers\Client\ReturnRequestController;
 use App\Http\Controllers\Client\OrderController;
 use App\Http\Controllers\Client\PayOSWebhookController;
 use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\ShippingAddressController;
 use App\Http\Controllers\Client\UserController;
+use App\Http\Controllers\Client\SitemapController;
 use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +64,10 @@ Route::name('client.')->middleware('visitor')->group(function () {
         Route::controller(ReviewController::class)->as('review.')->group(function () {
             Route::post('/danh-gia', 'store')->name('store');
         });
+
+        Route::controller(ReturnRequestController::class)->as('returnRequest.')->group(function () {
+            Route::post('/yeu-cau-doi-tra/{order}', 'store')->name('store')->middleware('throttle:5,1');
+        });
     });
 
     Route::middleware('customGuest:web')->group(function () {
@@ -94,6 +101,13 @@ Route::name('client.')->middleware('visitor')->group(function () {
         Route::get('/gio-hang', 'showCart')->name('showCart');
         Route::delete('/clear-cart', 'clearCart')->name('clearCart');
     });
+
+    Route::controller(CompareController::class)->as('compare.')->group(function () {
+        Route::get('/so-sanh', 'index')->name('index');
+        Route::post('/so-sanh/{product}', 'add')->name('add')->middleware('throttle:30,1');
+        Route::delete('/so-sanh/{product}', 'remove')->name('remove');
+        Route::delete('/so-sanh', 'clear')->name('clear');
+    });
 });
 
 Route::middleware('customAuth:web')->group(function () {
@@ -102,6 +116,9 @@ Route::middleware('customAuth:web')->group(function () {
         Route::get('/email/verify/{id}/{hash}', 'handleVerifyEmail')->name('verification.verify');
     });
 });
+
+// Sitemap — public, no auth required
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // PayOS server-side webhook — CSRF exempt, no auth required
 Route::post('/payment/webhook', [PayOSWebhookController::class, 'handle'])

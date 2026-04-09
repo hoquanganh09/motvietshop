@@ -82,6 +82,20 @@ abstract class Controller
                     'enabled' => true,
                 ],
                 [
+                    'label' => 'Tồn kho',
+                    'icon' => 'bi bi-archive-fill fs-2x',
+                    'route' => route('admin.inventory.index'),
+                    'active_route_name' => ['admin.inventory.index'],
+                    'enabled' => true,
+                ],
+                [
+                    'label' => 'Đổi/trả hàng',
+                    'icon' => 'bi bi-arrow-return-left fs-2x',
+                    'route' => route('admin.returnRequest.index'),
+                    'active_route_name' => ['admin.returnRequest.index'],
+                    'enabled' => true,
+                ],
+                [
                     'label' => 'Quản lý Banner',
                     'icon' => 'bi bi-card-image fs-2x',
                     'route' => route('admin.banner.index'),

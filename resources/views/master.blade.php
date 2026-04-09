@@ -10,6 +10,14 @@
     @stack('css')
 
     <title>{{ config('app.name') }}</title>
+    <!-- Default SEO meta tags — individual pages can push overrides via @push('head-meta') -->
+    <meta name="description" content="{{ config('app.name') }} - Thời trang Việt, phong cách hiện đại">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:title" content="{{ config('app.name') }}">
+    <meta property="og:description" content="{{ config('app.name') }} - Thời trang Việt, phong cách hiện đại">
+    <meta name="twitter:card" content="summary_large_image">
+    @stack('head-meta')
     <script>
         const theme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', theme);

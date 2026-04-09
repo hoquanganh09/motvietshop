@@ -152,6 +152,11 @@
     @push('js')
         <script>
             $('.btn-process-checkout').on('click', function() {
+                // Disable all checkout buttons and show spinner to prevent double submit
+                const $btns = $('.btn-process-checkout');
+                $btns.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý...'
+                );
                 $('#checkout-form').submit();
             });
         </script>

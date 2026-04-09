@@ -78,6 +78,8 @@ class ClientController extends Controller
     {
         $maximumRelatedProduct = 10;
         $product->load(Product::getProductRelations());
+        // Eager-load reviews separately to avoid N+1 when blade calls $product->reviews->avg()
+        $product->load('reviews');
         $reviews = Review::query()
             ->with([
                 'user',
@@ -93,17 +95,30 @@ class ClientController extends Controller
             Session::put('productViewed', $arrProductViewed);
         }
 
+        // Similar products: same kind + price within ±40% range for better relevance
+        $priceMin = $product->price * 0.6;
+        $priceMax = $product->price * 1.4;
         $productVieweds = Product::query()
-            ->where(function ($query) use ($product) {
-                $query->orWhereHas('kind', function ($query) use ($product) {
-                    $query->where('id', $product->kind_id);
-                });
-            })
+            ->whereHas('kind', fn($q) => $q->where('id', $product->kind_id))
             ->where('id', '!=', $product->id)
+            ->whereBetween('price', [$priceMin, $priceMax])
             ->active()
             ->with(Product::getProductRelations())
             ->limit($maximumRelatedProduct)
             ->get();
+
+        // Fallback: if fewer than 4 similar products, fill with any from same kind
+        if ($productVieweds->count() < 4) {
+            $existingIds = $productVieweds->pluck('id')->push($product->id);
+            $fallbacks = Product::query()
+                ->whereHas('kind', fn($q) => $q->where('id', $product->kind_id))
+                ->whereNotIn('id', $existingIds)
+                ->active()
+                ->with(Product::getProductRelations())
+                ->limit($maximumRelatedProduct - $productVieweds->count())
+                ->get();
+            $productVieweds = $productVieweds->concat($fallbacks);
+        }
 
         $arrProductViewedIds = Session::get('productViewed', []);
         $recentlyVieweds = Product::query()
@@ -114,7 +129,14 @@ class ClientController extends Controller
             ->limit(10)
             ->get();
 
-        return view('client.product.detail', compact('product', 'productVieweds', 'reviews', 'recentlyVieweds'));
+        // Build rating distribution from already-loaded reviews (no extra query)
+        $totalReviews = $product->reviews->count();
+        $ratingDistribution = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $ratingDistribution[$i] = $product->reviews->where('rating', $i)->count();
+        }
+
+        return view('client.product.detail', compact('product', 'productVieweds', 'reviews', 'recentlyVieweds', 'ratingDistribution', 'totalReviews'));
     }
 
     public function wishlist()
@@ -212,7 +234,7 @@ class ClientController extends Controller
     {
         $orders = Order::query()
             ->where('user_id', Auth::id())
-            ->with(['orderDetails', 'orderDetails.product', 'orderDetails.product.images'])
+            ->with(['orderDetails', 'orderDetails.product', 'orderDetails.product.images', 'reviews'])
             ->orderBy('id', 'desc')
             ->paginate(5);
 

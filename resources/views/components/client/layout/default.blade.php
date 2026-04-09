@@ -44,6 +44,12 @@
             return response;
         }, error => {
             if (typeof NProgress !== 'undefined') NProgress.done();
+            // Show global error toast; skip 422 (validation errors handled per-form)
+            const status = error?.response?.status;
+            if (status && status !== 422 && typeof toast === 'function') {
+                const msg = error?.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+                toast(msg, 'error');
+            }
             return Promise.reject(error);
         });
         
@@ -269,4 +275,64 @@
             </svg>
         </a>
     </div>
+
+    <!-- Floating compare bar (visible when ≥ 1 product added) -->
+    @php $compareCount = count(session('compare', [])); @endphp
+    <div id="compareBar"
+        class="position-fixed bottom-0 start-0 w-100 bg-body border-top shadow-lg py-2 px-3 z-sticky d-flex align-items-center gap-3"
+        style="transition: transform .3s ease; {{ $compareCount > 0 ? '' : 'transform: translateY(100%);' }}">
+        <i class="ci-compare fs-lg text-dark flex-shrink-0"></i>
+        <span class="fw-semibold fs-sm me-auto">
+            So sánh (<span id="compareBarCount">{{ $compareCount }}</span>/3 sản phẩm)
+        </span>
+        <a id="compareBarBtn" href="{{ route('client.compare.index') }}"
+            class="btn btn-dark btn-sm {{ $compareCount < 2 ? 'disabled' : '' }}">
+            So sánh ngay
+        </a>
+        <button type="button" id="compareBarClear" class="btn btn-outline-secondary btn-sm">
+            Xóa tất cả
+        </button>
+    </div>
+
+    @push('js')
+        <script>
+            // Global helper to show/hide and update compare bar
+            function updateCompareBar(count) {
+                const $bar = $('#compareBar');
+                const $cnt = $('#compareBarCount');
+                const $btn = $('#compareBarBtn');
+                $cnt.text(count);
+                if (count > 0) {
+                    $bar.css('transform', 'translateY(0)');
+                } else {
+                    $bar.css('transform', 'translateY(100%)');
+                }
+                if (count >= 2) {
+                    $btn.removeClass('disabled');
+                } else {
+                    $btn.addClass('disabled');
+                }
+            }
+
+            $(() => {
+                $(document).on('click', '.btn-add-to-compare', function () {
+                    const url = $(this).data('url');
+                    ajax(url, 'post', {}, function (res) {
+                        toast(res.data.message);
+                        updateCompareBar(res.data.count);
+                    }, function (err) {
+                        const msg = err?.response?.data?.message || 'Có lỗi xảy ra';
+                        toast(msg, 'error');
+                    });
+                });
+
+                $('#compareBarClear').on('click', function () {
+                    ajax('{{ route('client.compare.clear') }}', 'delete', {}, function (res) {
+                        toast(res.data.message);
+                        updateCompareBar(0);
+                    });
+                });
+            });
+        </script>
+    @endpush
 @endsection

@@ -101,4 +101,44 @@ class OrderController extends Controller
 
         return (new OrderExport())->handle($order);
     }
+
+    public function exportAll()
+    {
+        $orders = Order::query()
+            ->with(['user', 'orderDetails'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $filename = 'don-hang-' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($orders) {
+            $handle = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['Mã đơn', 'Khách hàng', 'SĐT', 'Địa chỉ', 'Tổng tiền', 'Thanh toán', 'Trạng thái', 'Ngày đặt']);
+
+            foreach ($orders as $order) {
+                fputcsv($handle, [
+                    $order->code,
+                    $order->user?->fullname ?? $order->fullname,
+                    $order->phone_number,
+                    $order->address,
+                    $order->total,
+                    $order->getPaymentMethodLabel(),
+                    $order->getStatusLabel(),
+                    $order->created_at->format('d/m/Y H:i'),
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

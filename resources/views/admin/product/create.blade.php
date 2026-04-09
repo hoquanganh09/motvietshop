@@ -269,6 +269,31 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Flash Sale fields -->
+                                            <div class="row mb-10">
+                                                <div class="col-12 mb-3">
+                                                    <label class="form-label">Giá Flash Sale <span class="text-muted fs-xs">(để trống nếu không có)</span></label>
+                                                    <input type="number" name="sale_price"
+                                                        class="form-control @error('sale_price') is-invalid @enderror"
+                                                        placeholder="Giá flash sale" value="{{ old('sale_price') }}">
+                                                    @error('sale_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Bắt đầu Flash Sale</label>
+                                                    <input type="datetime-local" name="sale_start"
+                                                        class="form-control @error('sale_start') is-invalid @enderror"
+                                                        value="{{ old('sale_start') }}">
+                                                    @error('sale_start')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Kết thúc Flash Sale</label>
+                                                    <input type="datetime-local" name="sale_end"
+                                                        class="form-control @error('sale_end') is-invalid @enderror"
+                                                        value="{{ old('sale_end') }}">
+                                                    @error('sale_end')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                </div>
+                                            </div>
+
                                             <div class="mb-10">
                                                 <label class="form-label">Màu sản phẩm</label>
 

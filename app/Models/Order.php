@@ -177,4 +177,21 @@ class Order extends Model
     {
         return $this->status == OrderStatus::CANCEL->value;
     }
+
+    public function canReturn(): bool
+    {
+        // Only SHIPPED orders with no existing pending/approved return request
+        if ($this->status !== OrderStatus::SHIPPED->value) {
+            return false;
+        }
+
+        return !$this->returnRequests()
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+    }
+
+    public function returnRequests()
+    {
+        return $this->hasMany(\App\Models\ReturnRequest::class);
+    }
 }

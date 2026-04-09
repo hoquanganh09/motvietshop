@@ -14,48 +14,60 @@
             <!-- Items list -->
             <div class="col-lg-8">
                 <div class="pe-lg-2 pe-xl-3 me-xl-3">
-                    <div class="progress w-100 overflow-visible mb-4" role="progressbar"
-                        aria-label="Free shipping progress" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
-                        style="height: 4px">
-                        <div class="progress-bar bg-dark rounded-pill position-relative overflow-visible"
-                            style="width: 100%; height: 4px">
+                    @if (getCartCount() <= 0)
+                        <!-- Empty cart state -->
+                        <div class="text-center py-5 my-3">
+                            <i class="ci-shopping-bag fs-1 d-block mb-3 text-body-tertiary"></i>
+                            <h5 class="mb-2">Giỏ hàng của bạn đang trống</h5>
+                            <p class="text-body-secondary mb-4">Chưa có sản phẩm nào trong giỏ hàng. Hãy khám phá cửa hàng và thêm sản phẩm yêu thích!</p>
+                            <a class="btn btn-dark" href="{{ route('client.home.shop') }}">
+                                <i class="ci-arrow-left fs-base me-2"></i>Tiếp tục mua sắm
+                            </a>
                         </div>
-                    </div>
+                    @else
+                        <div class="progress w-100 overflow-visible mb-4" role="progressbar"
+                            aria-label="Free shipping progress" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                            style="height: 4px">
+                            <div class="progress-bar bg-dark rounded-pill position-relative overflow-visible"
+                                style="width: 100%; height: 4px">
+                            </div>
+                        </div>
 
-                    <!-- Table of items -->
-                    <table class="table position-relative z-2 mb-4">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="fs-sm fw-normal py-3 ps-0"><span class="text-body">Sản
-                                        phẩm</span></th>
-                                <th scope="col" class="text-body fs-sm fw-normal py-3 d-none d-xl-table-cell"><span
-                                        class="text-body">Giá tiền</span></th>
-                                <th scope="col" class="text-body fs-sm fw-normal py-3 d-none d-md-table-cell"><span
-                                        class="text-body">Số lượng</span></th>
-                                <th scope="col" class="text-body fs-sm fw-normal py-3 d-none d-md-table-cell"><span
-                                        class="text-body">Tổng tiền</span></th>
-                                <th scope="col" class="py-0 px-0">
-                                    <div class="nav justify-content-end">
-                                        <button data-url="{{ route('client.cart.clearCart') }}"
-                                            @if (getCartCount() <= 0) disabled @endif type="button"
-                                            class="btn-clear-cart nav-link d-inline-block text-decoration-underline text-nowrap py-3 px-0">
-                                            Làm mới giỏ hàng
-                                        </button>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="align-middle cart-items">
-                            @include('client.home.common.cart_item')
-                        </tbody>
-                    </table>
+                        <!-- Table of items -->
+                        <table class="table position-relative z-2 mb-4">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="fs-sm fw-normal py-3 ps-0"><span class="text-body">Sản
+                                            phẩm</span></th>
+                                    <th scope="col" class="text-body fs-sm fw-normal py-3 d-none d-xl-table-cell"><span
+                                            class="text-body">Giá tiền</span></th>
+                                    <th scope="col" class="text-body fs-sm fw-normal py-3 d-none d-md-table-cell"><span
+                                            class="text-body">Số lượng</span></th>
+                                    <th scope="col" class="text-body fs-sm fw-normal py-3 d-none d-md-table-cell"><span
+                                            class="text-body">Tổng tiền</span></th>
+                                    <th scope="col" class="py-0 px-0">
+                                        <div class="nav justify-content-end">
+                                            <button data-url="{{ route('client.cart.clearCart') }}"
+                                                type="button"
+                                                class="btn-clear-cart nav-link d-inline-block text-decoration-underline text-nowrap py-3 px-0">
+                                                Làm mới giỏ hàng
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="align-middle cart-items">
+                                @include('client.home.common.cart_item')
+                            </tbody>
+                        </table>
 
-                    <div class="nav position-relative z-2 mb-4 mb-lg-0">
-                        <a class="nav-link animate-underline px-0" href="{{ route('client.home.index') }}">
-                            <i class="ci-chevron-left fs-lg me-1"></i>
-                            <span class="animate-target">Tiếp tục mua hàng</span>
-                        </a>
-                    </div>
+                        <div class="nav position-relative z-2 mb-4 mb-lg-0">
+                            <a class="nav-link animate-underline px-0" href="{{ route('client.home.index') }}">
+                                <i class="ci-chevron-left fs-lg me-1"></i>
+                                <span class="animate-target">Tiếp tục mua hàng</span>
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
 

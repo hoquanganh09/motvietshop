@@ -16,11 +16,19 @@ class Product extends Model
         'name',
         'price',
         'old_price',
+        'sale_price',
+        'sale_start',
+        'sale_end',
         'description',
         'washing_instructions',
         'kind_id',
         'is_active',
         'stock',
+    ];
+
+    protected $casts = [
+        'sale_start' => 'datetime',
+        'sale_end'   => 'datetime',
     ];
 
     public function images()
@@ -85,6 +93,23 @@ class Product extends Model
     public function isSale(): bool
     {
         return $this->old_price && $this->price < $this->old_price;
+    }
+
+    /** Returns true when a time-limited flash sale is currently active */
+    public function isOnFlashSale(): bool
+    {
+        if (!$this->sale_price || !$this->sale_start || !$this->sale_end) {
+            return false;
+        }
+
+        $now = now();
+        return $now->between($this->sale_start, $this->sale_end);
+    }
+
+    /** Returns the effective selling price (flash sale price if active, otherwise regular price) */
+    public function getCurrentPrice(): int|float
+    {
+        return $this->isOnFlashSale() ? $this->sale_price : $this->price;
     }
 
     public function getDiscount(): int

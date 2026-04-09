@@ -6,7 +6,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\HomeController;
-
+use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\ReturnRequestController;
 use App\Http\Controllers\Admin\KindController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -90,6 +91,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('order', OrderController::class);
         Route::controller(OrderController::class)->as('order.')->prefix('order')->group(function () {
             Route::get('/export/{order}', 'export')->name('export');
+            Route::get('/export-all', 'exportAll')->name('exportAll');
+        });
+        Route::controller(InventoryController::class)->as('inventory.')->prefix('inventory')->group(function () {
+            Route::get('/', 'index')->name('index');
+        });
+        Route::controller(ReturnRequestController::class)->as('returnRequest.')->prefix('doi-tra')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::put('/{returnRequest}', 'update')->name('update');
         });
     });
 
