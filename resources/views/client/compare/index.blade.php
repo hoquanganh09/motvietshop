@@ -15,7 +15,7 @@
 
         @if ($products->isEmpty())
             <div class="text-center py-5">
-                <i class="ci-compare fs-1 text-body-tertiary d-block mb-3" style="font-size: 4rem !important;"></i>
+                <i class="ci-repeat fs-1 text-body-tertiary d-block mb-3" style="font-size: 4rem !important;"></i>
                 <h5 class="text-body-secondary mb-3">Chưa có sản phẩm nào để so sánh</h5>
                 <p class="text-body-tertiary mb-4">Hãy thêm sản phẩm vào danh sách so sánh từ trang cửa hàng.</p>
                 <a href="{{ route('client.home.shop') }}" class="btn btn-dark">

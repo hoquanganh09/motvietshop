@@ -64,6 +64,15 @@ class ClientController extends Controller
             ->orderBy('id', 'desc')->limit(6)
             ->get();
 
+        $flashSaleProducts = Product::query()
+            ->active()
+            ->where('sale_price', '>', 0)
+            ->where('sale_start', '<=', now())
+            ->where('sale_end', '>=', now())
+            ->with(['colors', 'colors.color', 'sizes', 'sizes.size', 'images'])
+            ->limit(8)
+            ->get();
+
         return view('client.home.index', [
             'categories' => $categories,
             'banners' => $banners,
@@ -71,6 +80,7 @@ class ClientController extends Controller
             'canViewMore' => $products->hasMorePages(),
             'category' => $category,
             'reviews' => $reviews,
+            'flashSaleProducts' => $flashSaleProducts,
         ]);
     }
 

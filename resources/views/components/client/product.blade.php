@@ -9,19 +9,22 @@
                 <span
                     class="badge text-bg-danger position-absolute top-0 start-0 z-2 mt-2 mt-sm-3 ms-2 ms-sm-3">-{{ $product->getDiscount() }}%</span>
             @endif
-            <button type="button" data-url="{{ route('client.wishlist.store', $product->id) }}"
-                class="btn-add-to-wishlist btn btn-icon btn-secondary animate-pulse fs-base bg-transparent border-0 position-absolute top-0 end-0 z-2 mt-1 mt-sm-2 me-1 me-sm-2"
-                aria-label="Add to Wishlist">
-                <i class="ci-heart animate-target"></i>
-            </button>
-            <button type="button"
-                data-url="{{ route('client.compare.add', $product->id) }}"
-                data-name="{{ $product->name }}"
-                data-thumb="{{ $product->getThumbnail() }}"
-                class="btn-add-to-compare btn btn-icon btn-secondary animate-pulse fs-xs bg-transparent border-0 position-absolute bottom-0 end-0 z-2 mb-1 mb-sm-2 me-1 me-sm-2"
-                aria-label="So sánh" data-bs-toggle="tooltip" data-bs-title="So sánh">
-                <i class="ci-compare animate-target"></i>
-            </button>
+            {{-- Wishlist + Compare stacked at top-right, outside hover overlay --}}
+            <div class="position-absolute top-0 end-0 z-3 d-flex flex-column gap-1 mt-1 mt-sm-2 me-1 me-sm-2">
+                <button type="button" data-url="{{ route('client.wishlist.store', $product->id) }}"
+                    class="btn-add-to-wishlist btn btn-icon btn-secondary animate-pulse fs-base bg-transparent border-0"
+                    aria-label="Add to Wishlist">
+                    <i class="ci-heart animate-target"></i>
+                </button>
+                <button type="button"
+                    data-url="{{ route('client.compare.add', $product->id) }}"
+                    data-name="{{ $product->name }}"
+                    data-thumb="{{ $product->getThumbnail() }}"
+                    class="btn-add-to-compare btn btn-icon btn-secondary animate-pulse fs-xs bg-transparent border-0"
+                    aria-label="So sánh" data-bs-toggle="tooltip" data-bs-title="So sánh">
+                    <i class="ci-repeat animate-target"></i>
+                </button>
+            </div>
             <a class="d-flex bg-body-tertiary rounded p-3" href="{{ route('client.home.productDetail', $product->id) }}">
                 <div class="ratio" style="--cz-aspect-ratio: calc(308 / 274 * 100%)">
                     <img loading="lazy" src="{{ $product->getThumbnail() }}" alt="Image">

@@ -281,7 +281,7 @@
     <div id="compareBar"
         class="position-fixed bottom-0 start-0 w-100 bg-body border-top shadow-lg py-2 px-3 z-sticky d-flex align-items-center gap-3"
         style="transition: transform .3s ease; {{ $compareCount > 0 ? '' : 'transform: translateY(100%);' }}">
-        <i class="ci-compare fs-lg text-dark flex-shrink-0"></i>
+        <i class="ci-repeat fs-lg text-dark flex-shrink-0"></i>
         <span class="fw-semibold fs-sm me-auto">
             So sánh (<span id="compareBarCount">{{ $compareCount }}</span>/3 sản phẩm)
         </span>

@@ -13,7 +13,7 @@
     <button type="button" class="btn btn-lg btn-warning w-100 btn-show-return-form"
         data-order-id="{{ $order->id }}"
         data-url="{{ route('client.returnRequest.store', $order->id) }}">
-        <i class="ci-return me-2"></i>Yêu cầu đổi/trả
+        <i class="ci-refresh-ccw me-2"></i>Yêu cầu đổi/trả
     </button>
 @else
     <button disabled class="btn btn-lg btn-secondary w-100">Hủy</button>

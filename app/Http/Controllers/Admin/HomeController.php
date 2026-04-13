@@ -19,6 +19,7 @@ class HomeController extends Controller
 {
     public function __construct(private DashboardService $dashboardService)
     {
+        parent::__construct();
     }
 
     public function dashboard()
